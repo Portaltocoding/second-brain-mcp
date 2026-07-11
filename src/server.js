@@ -9,6 +9,7 @@ import { mkdir, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
 import { registro } from './registro.js';
 import { crearSiNoExiste, nombreArchivoSeguro } from './store.js';
 
@@ -114,6 +115,59 @@ for (const { nombre, dir, descripcion } of RESOURCES) {
     },
   );
 }
+
+// ── Prompt de ingesta: el ritual de meter un texto en el jardín ──────────────
+// El servidor no piensa (eso es del asistente), pero sí ORGANIZA: este prompt es
+// el procedimiento de ingesta escrito, para que «añade esto a mi second brain»
+// salga igual de bien en cualquier cliente y cualquier día.
+server.registerPrompt(
+  'ingerir',
+  {
+    description:
+      'Ingiere un texto en el second brain de forma organizada: clasifica (lectura/idea propia/apunte de taller), extrae conceptos con moderación, y teje sin enlazar nada sin permiso. modo: tal-cual (guardar íntegro), destilar (solo lo importante) o auto.',
+    argsSchema: {
+      texto: z.string().describe('el texto a ingerir (pegado, dictado o leído de un fichero)'),
+      modo: z.enum(['tal-cual', 'destilar', 'auto']).optional().describe('por defecto auto: decide y confirma'),
+      fuente: z.string().optional().describe('si viene de una lectura: título (y autor si se sabe)'),
+    },
+  },
+  ({ texto, modo = 'auto', fuente }) => ({
+    messages: [{
+      role: 'user',
+      content: {
+        type: 'text',
+        text: `Vas a ingerir un texto en mi second brain (MCP second-brain). Sigue este procedimiento; los pasos marcados DECISIÓN son míos, no los tomes por mí.
+
+MODO: ${modo}
+FUENTE: ${fuente || 'ninguna declarada'}
+
+TEXTO:
+<texto>
+${texto}
+</texto>
+
+PROCEDIMIENTO:
+
+1. CLASIFICA el texto:
+   - Tiene fuente externa (libro, artículo, vídeo) → es LECTURA: lectura_crear si no existe + lectura_nota por cada apunte.
+   - Es pensamiento mío, ya digerido → NOTA PERMANENTE (el título es una afirmación).
+   - Es apunte crudo de un proyecto en curso → mini_nota (dir = raíz del proyecto).
+   Si dudas entre dos, dime cuál eliges y por qué en una línea, y sigue.
+
+2. APLICA EL MODO:
+   - tal-cual: guarda el texto íntegro, sin resumir ni recortar. Solo propón el título.
+   - destilar: extrae las 1-3 ideas más fuertes, cada una como posible nota independiente, escritas EN MIS PALABRAS, no las del texto. Enséñamelas antes de crear nada. DECISIÓN: yo apruebo cuáles entran.
+   - auto: si el texto es corto y ya suena a idea → tal-cual; si es largo o ajeno → propón destilar. Dime qué elegiste en una línea.
+
+3. CONCEPTOS: identifica 2-4 conceptos clave, no más — la escasez es el significado. Prefiere conceptos que YA existan en el grafo (compruébalo con vault_buscar o resurgir) antes que inventar sinónimos nuevos. Pásalos como temas.
+
+4. TEJE: crea con las tools (nota_permanente devuelve sugerencias de conexión). DECISIÓN: propónme las sugerencias fuertes; solo enlazas (nota_enlazar, con motivo de una frase) las que yo confirme.
+
+5. CIERRA en 2-3 líneas: qué entró, con qué conceptos, qué conexiones quedaron hechas o pendientes, y el enlace abrir de lo creado.`,
+      },
+    }],
+  }),
+);
 
 const transport = new StdioServerTransport();
 await server.connect(transport);

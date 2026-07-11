@@ -120,3 +120,35 @@ test('--init crea las tres carpetas y la portada, y es idempotente', async () =>
   assert.equal(await correr(), 0);
   assert.equal(await leer(join(destino, 'Inicio.md'), 'utf8'), 'mi portada propia\n');
 });
+
+test('el prompt ingerir existe y devuelve el procedimiento con el texto y el modo', async () => {
+  const vault = await mkdtemp(join(tmpdir(), 'second-brain-prompt-'));
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [SERVER],
+    env: { ...process.env, BRAIN_VAULT: vault },
+  });
+  const client = new Client({ name: 'test', version: '0.0.1' });
+  await client.connect(transport);
+  try {
+    const { prompts } = await client.listPrompts();
+    assert.deepEqual(prompts.map((p) => p.name), ['ingerir']);
+
+    const r = await client.getPrompt({
+      name: 'ingerir',
+      arguments: { texto: 'El entorno decide más que la voluntad.', modo: 'tal-cual', fuente: 'Hábitos Atómicos' },
+    });
+    const cuerpo = r.messages[0].content.text;
+    assert.match(cuerpo, /MODO: tal-cual/);
+    assert.match(cuerpo, /FUENTE: Hábitos Atómicos/);
+    assert.match(cuerpo, /El entorno decide más que la voluntad\./);
+    assert.match(cuerpo, /DECISIÓN/); // los pasos que son del usuario están marcados
+
+    // sin modo ni fuente: auto y ninguna declarada
+    const auto = await client.getPrompt({ name: 'ingerir', arguments: { texto: 'algo' } });
+    assert.match(auto.messages[0].content.text, /MODO: auto/);
+    assert.match(auto.messages[0].content.text, /FUENTE: ninguna declarada/);
+  } finally {
+    await client.close();
+  }
+});
