@@ -191,6 +191,12 @@ Dos detalles útiles:
   trata como enlaces reales, pero para verlos en el graph view activa
   «Propiedades» en los ajustes del grafo.
 
+> **¿Y Notion?** No. Este servidor trabaja sobre ficheros Markdown locales — esa
+> es la gracia: tus datos son tuyos, se abren con cualquier editor y el grafo va
+> a la velocidad del disco, no de una API. Obsidian tampoco es obligatorio (vale
+> cualquier carpeta `.md`); es solo el mejor visor. Si vienes de Notion: exporta
+> tus notas como Markdown y suéltalas en el vault — eso sí funciona.
+
 ## Modo lexico y modo rag
 
 `resurgir` tiene dos motores, y el sistema te dice cuándo cambiar:
