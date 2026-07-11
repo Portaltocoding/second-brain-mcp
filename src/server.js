@@ -5,12 +5,42 @@
 //
 // Configuración: la raíz del vault llega por la variable de entorno BRAIN_VAULT
 // o como primer argumento de línea de comandos. Sin ella, el servidor no arranca.
-import { readdir, readFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { registro } from './registro.js';
-import { nombreArchivoSeguro } from './store.js';
+import { crearSiNoExiste, nombreArchivoSeguro } from './store.js';
+
+// `--init /ruta`: andamiaje del vault — las tres carpetas y una portada. Idempotente:
+// sobre un vault que ya existe no toca nada (Inicio.md solo se crea si no está).
+if (process.argv[2] === '--init') {
+  const destino = process.argv[3] || process.env.BRAIN_VAULT;
+  if (!destino) {
+    console.error('uso: second-brain-mcp --init /ruta/al/vault');
+    process.exit(1);
+  }
+  for (const d of ['40-Lecturas', '50-Notas', '60-Conceptos']) {
+    await mkdir(join(destino, d), { recursive: true });
+  }
+  const portada = `# Segundo cerebro
+
+Tres carpetas, un grafo:
+
+- \`40-Lecturas/\` — lo que entra: libros, artículos, vídeos, cursos.
+- \`50-Notas/\` — lo que queda: ideas permanentes, con tu voz y tu título.
+- \`60-Conceptos/\` — lo que conecta: cada tema es un nodo con backlinks.
+
+Pídele a tu asistente:
+
+- «estoy leyendo X, apunta esto» — captura sin salir de lo que hacías.
+- «¿qué sé yo sobre X?» — resurgir trae las notas conectadas.
+- «¿cómo está el jardín?» — huérfanas, enlaces rotos y duplicados, para podar.
+`;
+  const creada = await crearSiNoExiste(join(destino, 'Inicio.md'), portada);
+  console.error(`second-brain-mcp: vault listo en ${destino}${creada ? '' : ' (Inicio.md ya existía, no se toca)'}`);
+  process.exit(0);
+}
 
 const vault = process.env.BRAIN_VAULT || process.argv[2];
 if (!vault) {

@@ -100,3 +100,23 @@ test('resources: las notas se listan y se leen como Markdown completo', async ()
     await client.close();
   }
 });
+
+test('--init crea las tres carpetas y la portada, y es idempotente', async () => {
+  const { spawn } = await import('node:child_process');
+  const { readFile: leer, writeFile: escribir, access } = await import('node:fs/promises');
+  const destino = await mkdtemp(join(tmpdir(), 'second-brain-init-'));
+  const correr = () => new Promise((resolve) => {
+    const p = spawn(process.execPath, [SERVER, '--init', destino]);
+    p.on('exit', (code) => resolve(code));
+  });
+  assert.equal(await correr(), 0);
+  for (const d of ['40-Lecturas', '50-Notas', '60-Conceptos']) {
+    await access(join(destino, d)); // lanza si no existe
+  }
+  assert.match(await leer(join(destino, 'Inicio.md'), 'utf8'), /Segundo cerebro/);
+
+  // idempotente: una portada editada a mano sobrevive a un segundo --init
+  await escribir(join(destino, 'Inicio.md'), 'mi portada propia\n');
+  assert.equal(await correr(), 0);
+  assert.equal(await leer(join(destino, 'Inicio.md'), 'utf8'), 'mi portada propia\n');
+});

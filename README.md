@@ -52,7 +52,14 @@ Con cualquier otro cliente MCP:
 }
 ```
 
-Y listo. La primera nota crea las carpetas que hagan falta.
+Y listo. La primera nota crea las carpetas que hagan falta. Si prefieres dejar
+el vault montado desde el principio (carpetas + portada), hay andamiaje:
+
+```bash
+npx -y second-brain-mcp --init /ruta/a/tu/vault
+```
+
+Es idempotente: sobre un vault que ya existe no toca nada.
 
 ### Variables de entorno
 
@@ -112,6 +119,22 @@ vault://concepto/{nombre}
 
 El patrón que funciona: buscar barato (`vault_buscar`, `resurgir`), leer entero
 solo lo que interesa (el resource).
+
+## Cómo se lleva con Obsidian
+
+Es su casa. Todo es Markdown plano con wikilinks nativos: graph view, backlinks
+y hover preview funcionan sin plugins. El servidor relee siempre (nunca cachea)
+y escribe de forma atómica, así que puedes editar en Obsidian con el servidor
+corriendo sin que se pisen. El `jardin` juzga los enlaces como Obsidian: sin
+distinguir mayúsculas.
+
+Dos detalles útiles:
+
+- Cada nota creada devuelve un enlace `abrir` (`obsidian://open?...`): un clic
+  y estás en la nota dentro de la app.
+- `temas` y `relacionadas` viven en las propiedades (frontmatter). Obsidian los
+  trata como enlaces reales, pero para verlos en el graph view activa
+  «Propiedades» en los ajustes del grafo.
 
 ## Modo lexico y modo rag
 

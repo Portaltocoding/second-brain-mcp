@@ -35,6 +35,15 @@ function dirConceptos(vault) {
   return join(vault, CONCEPTOS);
 }
 
+// Enlace obsidian:// para abrir la nota en la app con un clic. El nombre del vault
+// en Obsidian es, por convención, el nombre de su carpeta raíz; si el usuario lo
+// renombró dentro de la app, el enlace sencillamente no resolverá — es un extra,
+// nunca algo de lo que dependa el sistema.
+function uriObsidian(vault, ruta) {
+  const rel = relative(vault, ruta).replace(/\.md$/, '');
+  return `obsidian://open?vault=${encodeURIComponent(basename(vault))}&file=${encodeURIComponent(rel)}`;
+}
+
 // Un concepto/tema es un NODO del grafo. Se canoniza (recorta + inicial en mayúscula)
 // para no duplicar "foco"/"Foco", y se referencia como wikilink de Obsidian.
 function normalizarConcepto(nombre) {
@@ -103,7 +112,7 @@ temas: ${listaConceptos(temas)}
 `;
   await store.escribirAtomica(ruta, contenido);
   for (const t of temas) await conceptoAsegurar(vault, t);
-  return { creado: true, ruta };
+  return { creado: true, ruta, abrir: uriObsidian(vault, ruta) };
 }
 
 export async function lecturaNota(vault, { titulo, texto, ubicacion } = {}) {
@@ -189,7 +198,7 @@ ${contenido}
       /* sin sugerencias no pasa nada */
     }
   }
-  return { creado: true, ruta, sugerencias };
+  return { creado: true, ruta, abrir: uriObsidian(vault, ruta), sugerencias };
 }
 
 // Añade "[[X]]" a una lista del frontmatter (p.ej. relacionadas: [...]) por regex,
@@ -239,7 +248,7 @@ export async function conceptoCrear(vault, { nombre, definicion, relacionados = 
     const { nombre: relCanon } = await conceptoAsegurar(vault, rel);
     await store.appendEnSeccion(ruta, 'Relacionados', `- [[${relCanon}]]`);
   }
-  return { ok: true, nombre: canon, ruta };
+  return { ok: true, nombre: canon, ruta, abrir: uriObsidian(vault, ruta) };
 }
 
 // Grep estructurado sobre todo el vault: fichero, número de línea, la línea y su
@@ -413,29 +422,33 @@ export async function jardin(vault) {
     notas.set(titulo, { rel, salientes, cruda: item.cruda });
   }
 
-  // Entrantes desde TODO el vault (también semanas/meses/diarios enlazan al brain).
-  const entrantes = new Map(); // titulo -> count
+  // Entrantes desde TODO el vault (también notas de fuera del brain enlazan a él).
+  // Claves en minúsculas: Obsidian resuelve wikilinks sin distinguir mayúsculas
+  // ([[foco]] abre Foco.md), y el jardín debe juzgar como Obsidian — si no,
+  // marcaría "roto" o "huérfana" lo que en la app funciona perfectamente.
+  const entrantes = new Map(); // titulo en minúsculas -> count
   for (const item of await Promise.all((await store.listarMd(vault)).map(leer))) {
     if (!item) continue;
     for (const m of item.cruda.matchAll(/\[\[([^\]#|]+?)(?:[#|][^\]]*)?\]\]/g)) {
-      const destino = m[1].trim();
+      const destino = m[1].trim().toLowerCase();
       entrantes.set(destino, (entrantes.get(destino) || 0) + 1);
     }
   }
+  const titulosMin = new Set([...notas.keys()].map((t) => t.toLowerCase()));
 
   const huerfanas = [];
   const rotos = [];
   const conceptosVacios = [];
   const sobreconectadas = [];
   for (const [titulo, { rel, salientes, cruda }] of notas) {
-    const tieneEntrantes = (entrantes.get(titulo) || 0) > 0;
+    const tieneEntrantes = (entrantes.get(titulo.toLowerCase()) || 0) > 0;
     // Huérfana: nadie la enlaza Y ella no enlaza a ninguna nota existente del brain.
-    const salientesReales = [...salientes].filter((s) => notas.has(s));
+    const salientesReales = [...salientes].filter((s) => titulosMin.has(s.toLowerCase()));
     if (!tieneEntrantes && salientesReales.length === 0) huerfanas.push(rel);
     for (const s of salientes) {
       // Un wikilink es "roto" si su destino no existe NI como nota del brain NI como
       // nota de estructura (mes/semana/día, que viven fuera de estos dirs).
-      if (!notas.has(s) && !/^\d{4}-(W\d{2}|\d{2})(-\d{2})?$/.test(s)) {
+      if (!titulosMin.has(s.toLowerCase()) && !/^\d{4}-(W\d{2}|\d{2})(-\d{2})?$/.test(s)) {
         rotos.push({ en: rel, destino: s });
       }
     }
@@ -624,5 +637,5 @@ export async function miniPromover(vault, { dir, titulo, temas, relacionadas } =
   const r = await notaPermanente(vault, { titulo, contenido, temas: temasFinales, relacionadas });
 
   await store.actualizarCampoFrontmatter(ruta, 'estado', 'promovida');
-  return { promovida: true, rutaVault: r.ruta, sugerencias: r.sugerencias || [] };
+  return { promovida: true, rutaVault: r.ruta, abrir: r.abrir, sugerencias: r.sugerencias || [] };
 }

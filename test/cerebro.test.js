@@ -343,3 +343,24 @@ test('jardin acota cada lista a 30 y cuenta los omitidos', async () => {
   assert.equal(r.huerfanas.length, 30);
   assert.equal(r.omitidos.huerfanas, 3);
 });
+
+test('jardin juzga los wikilinks como Obsidian: sin distinguir mayúsculas', async () => {
+  const vault = await vaultVacio();
+  await c.conceptoCrear(vault, { nombre: 'Foco' });
+  // [[foco]] en minúsculas: Obsidian lo resuelve a Foco.md, el jardín no debe marcarlo roto
+  await c.notaPermanente(vault, { titulo: 'El foco se diseña', contenido: 'Idea que menciona [[foco]] en el cuerpo.' });
+  const r = await c.jardin(vault);
+  assert.deepEqual(r.rotos, []);
+  // y Foco no es huérfana: la nota la enlaza, aunque sea en minúsculas
+  assert.ok(!r.huerfanas.includes('60-Conceptos/Foco.md'));
+});
+
+test('las creaciones devuelven el enlace obsidian:// para abrir la nota', async () => {
+  const vault = await vaultVacio();
+  const nota = await c.notaPermanente(vault, { titulo: 'Con enlace', contenido: 'idea' });
+  assert.match(nota.abrir, /^obsidian:\/\/open\?vault=.+&file=50-Notas%2FCon%20enlace$/);
+  const lectura = await c.lecturaCrear(vault, { titulo: 'Libro X' });
+  assert.match(lectura.abrir, /^obsidian:\/\/open\?vault=/);
+  const concepto = await c.conceptoCrear(vault, { nombre: 'Nodo' });
+  assert.match(concepto.abrir, /file=60-Conceptos%2FNodo$/);
+});
