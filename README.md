@@ -1,5 +1,11 @@
 # second-brain-mcp
 
+**Español** · [English](README.en.md)
+
+![tests](https://github.com/Portaltocoding/second-brain-mcp/actions/workflows/test.yml/badge.svg)
+![node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen)
+![license](https://img.shields.io/badge/license-MIT-blue)
+
 Tu segundo cerebro, en tu Obsidian, hablando con tu asistente.
 
 Esto es un servidor MCP que convierte una carpeta de Markdown en un **second brain
