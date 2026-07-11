@@ -2,6 +2,7 @@
 // resurfacing (resurgir), salud del grafo (jardin) y mini-brains por proyecto.
 import { readdir } from 'node:fs/promises';
 import { join, relative, basename, isAbsolute } from 'node:path';
+import matter from 'gray-matter';
 import * as fechas from './fechas.js';
 import * as store from './store.js';
 
@@ -265,17 +266,20 @@ export async function vaultBuscar(vault, { query, tipo, limite = 20 } = {}) {
   const resultados = [];
   let total = 0;
 
-  for (const ruta of ficheros) {
-    let texto;
+  const leidos = await Promise.all(ficheros.map(async (ruta) => {
     try {
-      texto = await store.leerCruda(ruta);
+      return { ruta, texto: await store.leerCruda(ruta) };
     } catch {
-      continue;
+      return null;
     }
+  }));
+  for (const item of leidos) {
+    if (!item) continue;
+    const { ruta, texto } = item;
     if (tipo) {
       let data = {};
       try {
-        ({ data } = await store.leerNota(ruta));
+        ({ data } = matter(texto));
       } catch {
         continue;
       }
@@ -331,33 +335,35 @@ export async function resurgir(vault, { texto, limite = 3, excluir } = {}) {
   if (!terminos.length) return { texto, resultados: [] };
 
   const dirs = ['40-Lecturas', '50-Notas', '60-Conceptos'];
-  const candidatos = [];
-  for (const d of dirs) {
-    for (const ruta of await listarMd(join(vault, d))) {
-      const rel = relative(vault, ruta);
-      if (excluir && rel === excluir) continue;
-      let cruda;
-      try {
-        cruda = await store.leerCruda(ruta);
-      } catch {
-        continue;
-      }
-      const titulo = rel.split('/').pop().replace(/\.md$/, '');
-      const tituloNorm = tokenizar(titulo).join(' ');
-      const cuerpoNorm = cruda.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-      const temasLinea = (cruda.match(/^temas:.*$/m) || [''])[0].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
-      let score = 0;
-      const motivos = [];
-      for (const t of terminos) {
-        let s = 0;
-        if (tituloNorm.includes(t)) s += 3;
-        if (temasLinea.includes(t)) s += 2;
-        const enCuerpo = (cuerpoNorm.match(new RegExp(t, 'g')) || []).length;
-        s += Math.min(3, enCuerpo);
-        if (s > 0) { score += s; motivos.push(t); }
-      }
-      if (score > 0) candidatos.push({ fichero: rel, titulo, score, terminos: motivos });
+  const rutas = (await Promise.all(dirs.map((d) => listarMd(join(vault, d))))).flat();
+  const leidas = await Promise.all(rutas.map(async (ruta) => {
+    const rel = relative(vault, ruta);
+    if (excluir && rel === excluir) return null;
+    try {
+      return { rel, cruda: await store.leerCruda(ruta) };
+    } catch {
+      return null;
     }
+  }));
+  const candidatos = [];
+  for (const item of leidas) {
+    if (!item) continue;
+    const { rel, cruda } = item;
+    const titulo = rel.split('/').pop().replace(/\.md$/, '');
+    const tituloNorm = tokenizar(titulo).join(' ');
+    const cuerpoNorm = cruda.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const temasLinea = (cruda.match(/^temas:.*$/m) || [''])[0].toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    let score = 0;
+    const motivos = [];
+    for (const t of terminos) {
+      let s = 0;
+      if (tituloNorm.includes(t)) s += 3;
+      if (temasLinea.includes(t)) s += 2;
+      const enCuerpo = (cuerpoNorm.match(new RegExp(t, 'g')) || []).length;
+      s += Math.min(3, enCuerpo);
+      if (s > 0) { score += s; motivos.push(t); }
+    }
+    if (score > 0) candidatos.push({ fichero: rel, titulo, score, terminos: motivos });
   }
   candidatos.sort((a, b) => b.score - a.score);
   return { texto, resultados: candidatos.slice(0, limite) };
@@ -368,34 +374,31 @@ export async function resurgir(vault, { texto, limite = 3, excluir } = {}) {
 // que se materializaron y nadie definió. Esta tool lo hace visible para poder podar.
 export async function jardin(vault) {
   const dirs = ['40-Lecturas', '50-Notas', '60-Conceptos'];
-  const notas = new Map(); // titulo -> {rel, salientes:Set, cruda}
-  for (const d of dirs) {
-    for (const ruta of await listarMd(join(vault, d))) {
-      let cruda;
-      try {
-        cruda = await store.leerCruda(ruta);
-      } catch {
-        continue;
-      }
-      const rel = relative(vault, ruta);
-      const titulo = rel.split('/').pop().replace(/\.md$/, '');
-      const salientes = new Set(
-        [...cruda.matchAll(/\[\[([^\]#|]+?)(?:[#|][^\]]*)?\]\]/g)].map((m) => m[1].trim()),
-      );
-      notas.set(titulo, { rel, salientes, cruda });
+  const leer = async (ruta) => {
+    try {
+      return { ruta, cruda: await store.leerCruda(ruta) };
+    } catch {
+      return null;
     }
+  };
+
+  const notas = new Map(); // titulo -> {rel, salientes:Set, cruda}
+  const rutasBrain = (await Promise.all(dirs.map((d) => listarMd(join(vault, d))))).flat();
+  for (const item of await Promise.all(rutasBrain.map(leer))) {
+    if (!item) continue;
+    const rel = relative(vault, item.ruta);
+    const titulo = rel.split('/').pop().replace(/\.md$/, '');
+    const salientes = new Set(
+      [...item.cruda.matchAll(/\[\[([^\]#|]+?)(?:[#|][^\]]*)?\]\]/g)].map((m) => m[1].trim()),
+    );
+    notas.set(titulo, { rel, salientes, cruda: item.cruda });
   }
 
   // Entrantes desde TODO el vault (también semanas/meses/diarios enlazan al brain).
   const entrantes = new Map(); // titulo -> count
-  for (const ruta of await listarMd(vault)) {
-    let cruda;
-    try {
-      cruda = await store.leerCruda(ruta);
-    } catch {
-      continue;
-    }
-    for (const m of cruda.matchAll(/\[\[([^\]#|]+?)(?:[#|][^\]]*)?\]\]/g)) {
+  for (const item of await Promise.all((await listarMd(vault)).map(leer))) {
+    if (!item) continue;
+    for (const m of item.cruda.matchAll(/\[\[([^\]#|]+?)(?:[#|][^\]]*)?\]\]/g)) {
       const destino = m[1].trim();
       entrantes.set(destino, (entrantes.get(destino) || 0) + 1);
     }
@@ -442,17 +445,26 @@ export async function jardin(vault) {
   }
   const conceptosDuplicados = [...porClave.values()].filter((g) => g.length > 1);
 
+  // Techo por categoría: jardin es un diagnóstico, no un inventario. Si una lista
+  // se corta, `omitidos` dice cuántos quedaron fuera — se poda por tandas.
+  const LIMITE_LISTA = 30;
+  const informe = { huerfanas, rotos, conceptosVacios, sobreconectadas, conceptosDuplicados };
+  const omitidos = {};
+  for (const [clave, lista] of Object.entries(informe)) {
+    if (lista.length > LIMITE_LISTA) {
+      omitidos[clave] = lista.length - LIMITE_LISTA;
+      informe[clave] = lista.slice(0, LIMITE_LISTA);
+    }
+  }
+
   return {
     totales: {
       lecturas: [...notas.values()].filter((n) => n.rel.startsWith('40-')).length,
       notas: [...notas.values()].filter((n) => n.rel.startsWith('50-')).length,
       conceptos: [...notas.values()].filter((n) => n.rel.startsWith('60-')).length,
     },
-    huerfanas,
-    rotos,
-    conceptosVacios,
-    sobreconectadas,
-    conceptosDuplicados,
+    ...informe,
+    ...(Object.keys(omitidos).length ? { omitidos } : {}),
   };
 }
 

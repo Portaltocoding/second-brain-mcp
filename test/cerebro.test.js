@@ -332,3 +332,14 @@ test('vault_buscar respeta limite y marca truncado', async () => {
   assert.equal(completo.truncado, false);
   assert.equal(completo.total, 5);
 });
+
+test('jardin acota cada lista a 30 y cuenta los omitidos', async () => {
+  const vault = await vaultVacio();
+  for (let i = 0; i < 33; i++) {
+    await c.notaPermanente(vault, { titulo: `Huerfana ${i}`, contenido: `contenido aislado ${i} zzz${i}` });
+  }
+  const r = await c.jardin(vault);
+  assert.equal(r.totales.notas, 33);
+  assert.equal(r.huerfanas.length, 30);
+  assert.equal(r.omitidos.huerfanas, 3);
+});
