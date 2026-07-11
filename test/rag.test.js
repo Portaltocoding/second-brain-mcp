@@ -75,17 +75,32 @@ test('BRAIN_MODO=rag cambia el motor por defecto y modo inválido falla', async 
   await assert.rejects(() => c.resurgir(vault, { texto: 'grafos', modo: 'turbo' }), /modo debe ser/);
 });
 
-test('en modo lexico, superado el umbral el sistema sugiere pasar a rag', async () => {
+test('la guía hacia rag sale solo cuando toca: brain grande + búsqueda floja, y una vez por sesión', async () => {
   const vault = await vaultVacio();
+  // Una nota cuyo TÍTULO casa fuerte (score >= 5) y varias de relleno.
+  await c.notaPermanente(vault, { titulo: 'Grafos de conocimiento grafos', contenido: 'grafos por todas partes: grafos, grafos.' });
   for (let i = 0; i < 4; i++) {
-    await c.notaPermanente(vault, { titulo: `Nota numero ${i}`, contenido: `contenido sobre grafos ${i}` });
+    await c.notaPermanente(vault, { titulo: `Relleno numero ${i}`, contenido: `apunte cualquiera ${i}` });
   }
   process.env.BRAIN_RAG_UMBRAL = '3';
   try {
-    const r = await c.resurgir(vault, { texto: 'grafos' });
-    assert.match(r.sugerencia, /modo rag/);
-    const pocas = await c.resurgir(vault, { texto: 'grafos', modo: 'rag' });
-    assert.equal(pocas.sugerencia, undefined); // en modo rag no hay nada que sugerir
+    // Búsqueda FUERTE por encima del umbral: no se molesta con sugerencias.
+    const fuerte = await c.resurgir(vault, { texto: 'grafos de conocimiento' });
+    assert.ok(fuerte.resultados[0].score >= 5);
+    assert.equal(fuerte.sugerencia, undefined);
+
+    // Búsqueda FLOJA por encima del umbral: guía hacia rag, con el porqué.
+    const floja = await c.resurgir(vault, { texto: 'apunte cualquiera' });
+    assert.ok((floja.resultados[0]?.score ?? 0) < 5);
+    assert.match(floja.sugerencia, /modo: "rag"/);
+
+    // Y no insiste: la siguiente búsqueda floja de la misma sesión va limpia.
+    const repite = await c.resurgir(vault, { texto: 'apunte cualquiera' });
+    assert.equal(repite.sugerencia, undefined);
+
+    // En modo rag no hay nada que sugerir.
+    const rag = await c.resurgir(vault, { texto: 'apunte cualquiera', modo: 'rag' });
+    assert.equal(rag.sugerencia, undefined);
   } finally {
     delete process.env.BRAIN_RAG_UMBRAL;
   }

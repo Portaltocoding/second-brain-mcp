@@ -317,9 +317,12 @@ function tokenizar(texto) {
 // cuando hay solape real, ordenado por fuerza de la conexión.
 //   score = 3×hit en título + 2×hit en temas (frontmatter) + 1×hit en cuerpo (cap 3/término)
 // A partir de cuántas notas el modo lexico empieza a quedarse corto y resurgir
-// sugiere activar el rag. Con pocas notas, BM25 no aporta (poca estadística y el
-// título ya lo encuentra todo); con muchas, el fragmento citado vale oro.
-const UMBRAL_RAG = 30;
+// puede sugerir el rag. Con pocas notas, BM25 no aporta (poca estadística y el
+// título ya lo encuentra todo); con un puñado grande, el fragmento citado vale oro.
+const UMBRAL_RAG = 50;
+// Guiar no es insistir: la sugerencia sale como mucho UNA vez por proceso (sesión
+// MCP), y solo en el momento en que habría ayudado — brain grande Y búsqueda floja.
+let ragSugerido = false;
 
 export async function resurgir(vault, { texto, limite = 3, excluir, modo } = {}) {
   // El modo se decide por llamada (`modo`), por entorno (BRAIN_MODO) o queda en
@@ -367,12 +370,20 @@ export async function resurgir(vault, { texto, limite = 3, excluir, modo } = {})
   candidatos.sort((a, b) => b.score - a.score);
   const salida = { texto, modo: 'lexico', resultados: candidatos.slice(0, limite) };
 
-  // Detección: cuando el brain ya es grande, el modo lexico se queda corto y el
-  // sistema lo dice — una vez por respuesta, sin insistir en modo rag.
+  // Guía hacia el rag, solo cuando toca: (1) el brain ya es un puñado grande de
+  // notas, (2) ESTA búsqueda salió floja en lexico (sin resultados o por debajo
+  // del listón de conexión fuerte) — justo el caso donde BM25 por fragmentos
+  // habría ayudado — y (3) no lo hemos sugerido ya en esta sesión. Si lexico
+  // encuentra fuerte, no hay nada que mejorar y no se molesta.
   const totalNotas = leidas.filter(Boolean).length;
   const umbral = Number(process.env.BRAIN_RAG_UMBRAL) || UMBRAL_RAG;
-  if (totalNotas >= umbral) {
-    salida.sugerencia = `tu brain ya tiene ${totalNotas} notas: el modo rag (BM25 por fragmentos) afina más a este tamaño. Actívalo con BRAIN_MODO=rag, o pruébalo en una llamada con modo: "rag".`;
+  const topScore = salida.resultados[0]?.score ?? 0;
+  if (!ragSugerido && totalNotas >= umbral && topScore < 5) {
+    ragSugerido = true;
+    const porQue = salida.resultados.length
+      ? `y esta búsqueda salió floja en modo lexico (mejor score: ${topScore})`
+      : 'y esta búsqueda no encontró nada en modo lexico';
+    salida.sugerencia = `este brain ya tiene ${totalNotas} notas ${porQue}. Repite la misma consulta con modo: "rag" — BM25 por fragmentos: casa singular/plural y devuelve el párrafo que responde. Si convence, se fija con BRAIN_MODO=rag; si no, no ha pasado nada: los dos motores leen el mismo vault.`;
   }
   return salida;
 }

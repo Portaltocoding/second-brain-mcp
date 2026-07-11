@@ -60,7 +60,7 @@ Y listo. La primera nota crea las carpetas que hagan falta.
 |---|---|---|
 | `BRAIN_VAULT` | La ruta de tu vault (obligatoria; también vale como primer argumento) | — |
 | `BRAIN_MODO` | Motor de `resurgir`: `lexico` o `rag` | `lexico` |
-| `BRAIN_RAG_UMBRAL` | A partir de cuántas notas se sugiere el modo rag | `30` |
+| `BRAIN_RAG_UMBRAL` | A partir de cuántas notas puede sugerirse el modo rag | `50` |
 
 ## Las tres carpetas
 
@@ -125,12 +125,22 @@ solo lo que interesa (el resource).
   párrafo exacto que responde**, listo para usar como contexto. Pensado para
   cuando el brain crece y las notas son largas.
 
-¿Cuál usar? No lo pienses: empieza en `lexico`. Cuando tu brain pase de 30 notas
-(configurable con `BRAIN_RAG_UMBRAL`), el propio `resurgir` te lo sugerirá en su
-respuesta. Puedes probar el rag en una sola llamada (`modo: "rag"`) o fijarlo
-para siempre con `BRAIN_MODO=rag`. Sin índices que reconstruir ni modelos que
-descargar: los dos motores releen el vault al vuelo, así que puedes seguir
-editando en Obsidian sin miedo.
+¿Cuál usar? No lo pienses: empieza en `lexico` y deja que el sistema te guíe.
+La sugerencia de pasar a rag aparece **solo cuando toca** — cuando se dan las
+dos cosas a la vez:
+
+1. tu brain ya es un puñado grande de notas (50+, configurable con
+   `BRAIN_RAG_UMBRAL`), **y**
+2. la búsqueda que acabas de hacer volvió floja en léxico (sin resultados o por
+   debajo del listón de conexión fuerte) — es decir, justo el momento en que el
+   rag habría ayudado.
+
+Y una sola vez por sesión: te lo dice, te explica el porqué, y no vuelve a
+insistir. Si el léxico encuentra fuerte, no te interrumpe nadie. Probar es
+gratis: repite la consulta con `modo: "rag"` y compara; si convence, se fija
+con `BRAIN_MODO=rag`. Sin índices que reconstruir ni modelos que descargar:
+los dos motores releen el vault al vuelo, así que puedes seguir editando en
+Obsidian sin miedo.
 
 ## Los principios (por si te preguntas por qué es así)
 

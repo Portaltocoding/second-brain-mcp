@@ -79,7 +79,7 @@ export const registro = {
   },
   resurgir: {
     description:
-      'El motor de resurfacing del second brain: dado un texto (tarea, foco, idea a medias), devuelve las notas/lecturas/conceptos más conectados. Dos motores: lexico (puntúa título×3, temas×2, cuerpo×1) y rag (BM25 por fragmentos con stemming: devuelve el párrafo que responde). Por defecto lexico (o BRAIN_MODO); cuando el brain crece, la propia respuesta sugiere pasar a rag.',
+      'El motor de resurfacing del second brain: dado un texto (tarea, foco, idea a medias), devuelve las notas/lecturas/conceptos más conectados. Dos motores: lexico (puntúa título×3, temas×2, cuerpo×1) y rag (BM25 por fragmentos con stemming: devuelve el párrafo que responde). Por defecto lexico (o BRAIN_MODO); si el brain ya es grande y una búsqueda lexica sale floja, la respuesta trae una `sugerencia` de probar rag (una vez por sesión) — propónsela al usuario, el cambio de modo es decisión suya.',
     schema: {
       texto: z.string(),
       limite: z.number().optional().describe('máximo de resultados, por defecto 3'),
