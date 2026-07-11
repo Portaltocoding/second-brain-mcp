@@ -5,9 +5,12 @@
 //
 // Configuración: la raíz del vault llega por la variable de entorno BRAIN_VAULT
 // o como primer argumento de línea de comandos. Sin ella, el servidor no arranca.
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { readdir, readFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { registro } from './registro.js';
+import { nombreArchivoSeguro } from './store.js';
 
 const vault = process.env.BRAIN_VAULT || process.argv[2];
 if (!vault) {
@@ -37,6 +40,47 @@ for (const [nombre, def] of Object.entries(registro)) {
       } catch (e) {
         return contenidoError(e);
       }
+    },
+  );
+}
+
+// ── Resources: leer notas completas sin gastar una tool call ─────────────────
+// Cada nota del grafo es un resource navegable (vault://nota/Mi idea). El grep
+// (vault_buscar) localiza; el resource trae la nota entera, en Markdown tal cual.
+const RESOURCES = [
+  { nombre: 'lectura', dir: '40-Lecturas', descripcion: 'Notas de lectura (40-Lecturas/)' },
+  { nombre: 'nota', dir: '50-Notas', descripcion: 'Notas permanentes (50-Notas/)' },
+  { nombre: 'concepto', dir: '60-Conceptos', descripcion: 'Nodos-concepto (60-Conceptos/)' },
+];
+
+async function titulosDe(dir) {
+  try {
+    return (await readdir(join(vault, dir)))
+      .filter((f) => f.endsWith('.md'))
+      .map((f) => f.replace(/\.md$/, ''));
+  } catch {
+    return [];
+  }
+}
+
+for (const { nombre, dir, descripcion } of RESOURCES) {
+  server.registerResource(
+    nombre,
+    new ResourceTemplate(`vault://${nombre}/{titulo}`, {
+      list: async () => ({
+        resources: (await titulosDe(dir)).map((t) => ({
+          uri: `vault://${nombre}/${encodeURIComponent(t)}`,
+          name: t,
+          mimeType: 'text/markdown',
+        })),
+      }),
+    }),
+    { description: descripcion, mimeType: 'text/markdown' },
+    async (uri, { titulo }) => {
+      // nombreArchivoSeguro neutraliza / y \: un titulo con ../ no puede salir del vault.
+      const fichero = `${nombreArchivoSeguro(decodeURIComponent(titulo))}.md`;
+      const texto = await readFile(join(vault, dir, fichero), 'utf8');
+      return { contents: [{ uri: uri.href, mimeType: 'text/markdown', text: texto }] };
     },
   );
 }

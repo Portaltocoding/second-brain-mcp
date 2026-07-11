@@ -67,3 +67,36 @@ test('el servidor exige BRAIN_VAULT (o el vault como argumento) para arrancar', 
   assert.equal(salida.code, 1);
   assert.match(salida.err, /BRAIN_VAULT/);
 });
+
+test('resources: las notas se listan y se leen como Markdown completo', async () => {
+  const vault = await mkdtemp(join(tmpdir(), 'second-brain-resources-'));
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [SERVER],
+    env: { ...process.env, BRAIN_VAULT: vault },
+  });
+  const client = new Client({ name: 'test', version: '0.0.1' });
+  await client.connect(transport);
+  try {
+    await client.callTool({
+      name: 'nota_permanente',
+      arguments: { titulo: 'La escasez es el significado', contenido: 'Un enlace vale por su porqué.', temas: ['grafos'] },
+    });
+
+    const { resources } = await client.listResources();
+    const nombres = resources.map((r) => r.name);
+    assert.ok(nombres.includes('La escasez es el significado'));
+    assert.ok(nombres.includes('Grafos')); // el tema materializado como concepto
+
+    const nota = resources.find((r) => r.name === 'La escasez es el significado');
+    const leida = await client.readResource({ uri: nota.uri });
+    assert.equal(leida.contents[0].mimeType, 'text/markdown');
+    assert.match(leida.contents[0].text, /tipo: permanente/);
+    assert.match(leida.contents[0].text, /Un enlace vale por su porqué\./);
+
+    // traversal: un titulo con ../ no puede salir del vault
+    await assert.rejects(() => client.readResource({ uri: 'vault://nota/..%2F..%2Fetc%2Fpasswd' }));
+  } finally {
+    await client.close();
+  }
+});

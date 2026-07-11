@@ -90,6 +90,22 @@ Convive con el resto de tu vault: el servidor solo escribe en esas tres carpetas
 | `jardin` | Salud del grafo: huérfanas, wikilinks rotos, conceptos sin definir, notas sobreconectadas, conceptos duplicados |
 | `concepto_fusionar` | Fusiona dos conceptos duplicados: reescribe todos los wikilinks del vault y borra el nodo partido |
 
+## Resources
+
+Además de las tools, cada nota del grafo se expone como **resource MCP** legible
+y navegable — leer una nota completa no gasta una tool call, y en clientes como
+Claude Code puedes adjuntarlas con `@`:
+
+```
+vault://lectura/{titulo}     una lectura de 40-Lecturas/
+vault://nota/{titulo}        una nota permanente de 50-Notas/
+vault://concepto/{nombre}    un nodo-concepto de 60-Conceptos/
+```
+
+El contenido llega como `text/markdown`, tal cual está en el fichero
+(frontmatter incluido). Patrón típico: `vault_buscar` o `resurgir` para
+localizar, el resource para leer entero.
+
 ### Mini-brains (bandeja por proyecto)
 
 Cualquier repo puede tener su `brain/` local: apuntes de taller, crudos, que viven
