@@ -25,6 +25,42 @@ Semanas después, trabajando en otra cosa, preguntas por diseñar tu rutina de
 mañanas y el sistema te trae de vuelta *«El entorno decide por ti»* con el párrafo
 exacto. Eso es el segundo cerebro: no recordar tú, que recuerde él.
 
+## El mapa
+
+Cada etiqueta es `método / qué es`; en las dos puertas principales va también la
+frase que lo dispara:
+
+```
+                             tú + tu asistente
+                                  │      ▲
+                ingerir / ingesta │      │ resurgir / recuerdo
+                   «añade esto»   ▼      │   «¿qué sé de esto?»
+                           ┌──────────────┐
+                           │ second-brain │
+                           └───────┬──────┘
+                     clasifica lo que entra
+       ┌───────────────────────────┼───────────────────────────┐
+       │ lectura_crear / ficha     │ nota_permanente / idea    │ mini_nota / apunte
+       │ lectura_nota / apuntes    │                           │
+       ▼                           ▼                           ▼
+┌──────────────┐            ┌─────────────┐           ┌────────────────┐
+│ 40-Lecturas/ │            │  50-Notas/  │           │ proyecto/brain/│
+│ lo que entra │            │ lo que queda│           │ el taller      │
+└──────┬───────┘            └──────┬──────┘           └────────┬───────┘
+       │                           │                           │
+       │ nota_permanente /         │ temas                     │ mini_promover /
+       │ la idea madura            │                           │ madura o resuena
+       └──────────────────────────▶│───────────┐               │
+                                   │           ▼               │
+              nota_enlazar /       │   ┌───────────────┐       │
+              relacionar con       │   │ 60-Conceptos/ │◀──────┘
+              motivo (2-3 máx)     ▼   │ lo que conecta│
+                             otras ideas└───────────────┘
+
+     jardin / poda «¿cómo está el jardín?» · concepto_fusionar / coser nodos
+     vault_buscar / grep «busca dónde dije X» · mini_listar / cosecha del taller
+```
+
 ## Instalación
 
 Necesitas Node 18 o más nuevo y una carpeta para el vault (puede ser tu vault de
