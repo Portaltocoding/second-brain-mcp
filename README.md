@@ -110,14 +110,14 @@ promover siempre es decisión tuya.
 
 No hace falta que te aprendas las tools. Dile a tu asistente:
 
-> «añade esto **tal cual** a mi second brain»
+> «añade esto **directo** a mi second brain»
 > «añade **lo más importante** de esto»
 > «apunta esto que estoy escribiendo»
 
 y la ingesta se dispara según toque. El servidor trae el procedimiento escrito
 (prompt MCP `ingerir` — en Claude Code aparece como comando
 `/mcp__second-brain__ingerir`): clasifica el texto (¿lectura con fuente, idea
-tuya, apunte de taller?), aplica el modo — `tal-cual` guarda íntegro, `destilar`
+tuya, apunte de taller?), aplica el modo — `directo` guarda íntegro, `destilar`
 extrae las 1-3 ideas fuertes *en tus palabras* y te las enseña antes de crear
 nada, `auto` decide y te lo dice —, identifica 2-4 conceptos (prefiriendo los
 que ya existen en tu grafo antes que inventar sinónimos), y teje. Las decisiones

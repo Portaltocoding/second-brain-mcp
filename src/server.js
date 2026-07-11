@@ -124,10 +124,10 @@ server.registerPrompt(
   'ingerir',
   {
     description:
-      'Ingiere un texto en el second brain de forma organizada: clasifica (lectura/idea propia/apunte de taller), extrae conceptos con moderación, y teje sin enlazar nada sin permiso. modo: tal-cual (guardar íntegro), destilar (solo lo importante) o auto.',
+      'Ingiere un texto en el second brain de forma organizada: clasifica (lectura/idea propia/apunte de taller), extrae conceptos con moderación, y teje sin enlazar nada sin permiso. modo: directo (guardar íntegro), destilar (solo lo importante) o auto.',
     argsSchema: {
       texto: z.string().describe('el texto a ingerir (pegado, dictado o leído de un fichero)'),
-      modo: z.enum(['tal-cual', 'destilar', 'auto']).optional().describe('por defecto auto: decide y confirma'),
+      modo: z.enum(['directo', 'destilar', 'auto']).optional().describe('por defecto auto: decide y confirma'),
       fuente: z.string().optional().describe('si viene de una lectura: título (y autor si se sabe)'),
     },
   },
@@ -155,9 +155,9 @@ PROCEDIMIENTO:
    Si dudas entre dos, dime cuál eliges y por qué en una línea, y sigue.
 
 2. APLICA EL MODO:
-   - tal-cual: guarda el texto íntegro, sin resumir ni recortar. Solo propón el título.
+   - directo: guarda el texto íntegro, sin resumir ni recortar. Solo propón el título.
    - destilar: extrae las 1-3 ideas más fuertes, cada una como posible nota independiente, escritas EN MIS PALABRAS, no las del texto. Enséñamelas antes de crear nada. DECISIÓN: yo apruebo cuáles entran.
-   - auto: si el texto es corto y ya suena a idea → tal-cual; si es largo o ajeno → propón destilar. Dime qué elegiste en una línea.
+   - auto: si el texto es corto y ya suena a idea → directo; si es largo o ajeno → propón destilar. Dime qué elegiste en una línea.
 
 3. CONCEPTOS: identifica 2-4 conceptos clave, no más — la escasez es el significado. Prefiere conceptos que YA existan en el grafo (compruébalo con vault_buscar o resurgir) antes que inventar sinónimos nuevos. Pásalos como temas.
 

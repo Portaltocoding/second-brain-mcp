@@ -136,10 +136,10 @@ test('el prompt ingerir existe y devuelve el procedimiento con el texto y el mod
 
     const r = await client.getPrompt({
       name: 'ingerir',
-      arguments: { texto: 'El entorno decide más que la voluntad.', modo: 'tal-cual', fuente: 'Hábitos Atómicos' },
+      arguments: { texto: 'El entorno decide más que la voluntad.', modo: 'directo', fuente: 'Hábitos Atómicos' },
     });
     const cuerpo = r.messages[0].content.text;
-    assert.match(cuerpo, /MODO: tal-cual/);
+    assert.match(cuerpo, /MODO: directo/);
     assert.match(cuerpo, /FUENTE: Hábitos Atómicos/);
     assert.match(cuerpo, /El entorno decide más que la voluntad\./);
     assert.match(cuerpo, /DECISIÓN/); // los pasos que son del usuario están marcados
