@@ -1,32 +1,36 @@
 # second-brain-mcp
 
-Un **second brain en Obsidian**, servido por MCP. Lecturas, notas permanentes y
-conceptos que son nodos reales del grafo — con un motor de *resurfacing* que trae
-las ideas conectadas cuando trabajas, y un jardín que te dice dónde podar.
+Tu segundo cerebro, en tu Obsidian, hablando con tu asistente.
 
-En castellano, de principio a fin.
+Esto es un servidor MCP que convierte una carpeta de Markdown en un **second brain
+de verdad**: capturas lo que lees, lo conviertes en ideas con tus palabras, y esas
+ideas se conectan entre sí hasta formar un grafo que *piensa contigo* — cuando
+trabajas en algo, las notas relacionadas aparecen solas.
 
-## Filosofía
+Todo en castellano. Todo en ficheros tuyos. Sin bases de datos, sin nube, sin magia
+que no puedas abrir con un editor de texto.
 
-- **Nada entra suelto.** Cada idea se teje: idea↔origen, idea↔idea (`relacionadas`),
-  idea↔concepto (`temas`). Los conceptos no son tags: son notas reales en
-  `60-Conceptos/` que acumulan backlinks.
-- **La escasez es el significado.** Máximo 2-3 relacionadas por nota, cada enlace
-  con su porqué (el `motivo` de `nota_enlazar` queda escrito en `## Conexiones`).
-  Un cajón de sastre con 12 enlaces no conecta nada.
-- **Enlazar es decisión del usuario, nunca un side effect.** `nota_permanente`
-  devuelve `sugerencias` de conexión (solo las fuertes: score ≥ 5, máximo 2);
-  el asistente las propone, tú decides.
-- **El vault es la única fuente de verdad.** El servidor relee siempre y nunca
-  cachea: Obsidian y tú podéis editar a mano sin romper nada. Escritura atómica,
-  frontmatter editado línea a línea sin re-serializar tu documento.
+## ¿Cómo se siente?
+
+Le dices a tu asistente:
+
+> «Estoy leyendo Hábitos Atómicos, apunta esto: el entorno decide más que la
+> fuerza de voluntad»
+
+y él crea la lectura si no existía, guarda el apunte, y cuando esa idea madure la
+convierte en una nota permanente conectada al concepto `[[Hábitos]]` — que a su
+vez acumula todo lo que has pensado sobre el tema, venga del libro que venga.
+
+Semanas después, trabajando en otra cosa, preguntas por diseñar tu rutina de
+mañanas y el sistema te trae de vuelta *«El entorno decide por ti»* con el párrafo
+exacto. Eso es el segundo cerebro: no recordar tú, que recuerde él.
 
 ## Instalación
 
-Necesitas Node ≥ 18 y un vault (una carpeta; el servidor crea las subcarpetas al
-escribir).
+Necesitas Node 18 o más nuevo y una carpeta para el vault (puede ser tu vault de
+Obsidian de siempre: el servidor solo escribe en tres subcarpetas y no toca nada más).
 
-Con Claude Code, registrado a nivel de usuario (disponible en cualquier proyecto):
+Con **Claude Code**, a nivel de usuario (disponible en todos tus proyectos):
 
 ```bash
 claude mcp add --scope user second-brain \
@@ -34,7 +38,7 @@ claude mcp add --scope user second-brain \
   -- npx -y second-brain-mcp
 ```
 
-Con cualquier otro cliente MCP (config JSON genérica):
+Con cualquier otro cliente MCP:
 
 ```json
 {
@@ -48,86 +52,100 @@ Con cualquier otro cliente MCP (config JSON genérica):
 }
 ```
 
-La ruta del vault también puede pasarse como primer argumento en vez de la
-variable de entorno: `second-brain-mcp /ruta/a/tu/vault`.
+Y listo. La primera nota crea las carpetas que hagan falta.
 
-## Estructura del vault
+### Variables de entorno
 
-```
-vault/
-├── 40-Lecturas/     una nota por lectura (libro, artículo, vídeo, curso)
-├── 50-Notas/        ideas permanentes; el título es una afirmación
-└── 60-Conceptos/    cada tema es un NODO con backlinks, no un tag
-```
+| Variable | Qué hace | Por defecto |
+|---|---|---|
+| `BRAIN_VAULT` | La ruta de tu vault (obligatoria; también vale como primer argumento) | — |
+| `BRAIN_MODO` | Motor de `resurgir`: `lexico` o `rag` | `lexico` |
+| `BRAIN_RAG_UMBRAL` | A partir de cuántas notas se sugiere el modo rag | `30` |
 
-Convive con el resto de tu vault: el servidor solo escribe en esas tres carpetas
-(y `vault_buscar` puede buscar en todo).
-
-## Las tools
-
-### Capturar
-
-| Tool | Qué hace |
-|---|---|
-| `lectura_crear` | Crea la nota de una lectura con su frontmatter (autor, formato, temas) |
-| `lectura_nota` | Apunte a `## Notas mientras leo` (con ubicación opcional: "cap 3", "min 20") |
-| `lectura_actualizar` | Cambia estado (fija inicio/fin solo) y valoración (1-5) |
-| `nota_permanente` | Crea una idea en `50-Notas/`, la enlaza a su origen y materializa sus temas como conceptos. Devuelve sugerencias de conexión |
-| `nota_enlazar` | Enlaza dos ideas (bidireccional), con el motivo escrito en ambas |
-| `concepto_crear` | Crea o define un nodo-concepto |
-
-### Pensar
-
-| Tool | Qué hace |
-|---|---|
-| `resurgir` | *Resurfacing*: dado un texto (una tarea, una idea a medias), devuelve las notas más conectadas, puntuadas (título×3, temas×2, cuerpo×1). Solo aparece cuando hay solape real |
-| `vault_buscar` | Grep estructurado sobre todo el vault, con filtro por tipo y límite de resultados |
-
-### Podar
-
-| Tool | Qué hace |
-|---|---|
-| `jardin` | Salud del grafo: huérfanas, wikilinks rotos, conceptos sin definir, notas sobreconectadas, conceptos duplicados |
-| `concepto_fusionar` | Fusiona dos conceptos duplicados: reescribe todos los wikilinks del vault y borra el nodo partido |
-
-## Resources
-
-Además de las tools, cada nota del grafo se expone como **resource MCP** legible
-y navegable — leer una nota completa no gasta una tool call, y en clientes como
-Claude Code puedes adjuntarlas con `@`:
+## Las tres carpetas
 
 ```
-vault://lectura/{titulo}     una lectura de 40-Lecturas/
-vault://nota/{titulo}        una nota permanente de 50-Notas/
-vault://concepto/{nombre}    un nodo-concepto de 60-Conceptos/
+tu-vault/
+├── 40-Lecturas/     lo que entra: libros, artículos, vídeos, cursos
+├── 50-Notas/        lo que queda: ideas permanentes, tuyas, con tu título
+└── 60-Conceptos/    lo que conecta: cada tema es una nota real con backlinks
 ```
 
-El contenido llega como `text/markdown`, tal cual está en el fichero
-(frontmatter incluido). Patrón típico: `vault_buscar` o `resurgir` para
-localizar, el resource para leer entero.
+La regla de oro: **nada entra suelto**. Cada idea se enlaza a su origen, a los
+conceptos que toca y —con moderación— a otras ideas. Y la moderación importa:
+máximo 2-3 notas relacionadas, cada enlace con su porqué escrito. Un cajón con
+doce enlaces no conecta nada; tres enlaces con motivo son un mapa.
 
-### Mini-brains (bandeja por proyecto)
+## Qué sabe hacer
 
-Cualquier repo puede tener su `brain/` local: apuntes de taller, crudos, que viven
-y mueren con el proyecto — salvo los que se ganan la biblioteca.
+**Capturar** — `lectura_crear` abre la ficha de un libro o artículo;
+`lectura_nota` guarda apuntes mientras lees («cap 3: ...»); cuando una idea es
+tuya de verdad, `nota_permanente` la sube a `50-Notas/` con sus temas convertidos
+en conceptos navegables. `nota_enlazar` une dos ideas y deja escrito *por qué*.
 
-| Tool | Qué hace |
-|---|---|
-| `mini_nota` | Apunte crudo en `<proyecto>/brain/` |
-| `mini_listar` | Cuáles CALIFICAN para subir (resuenan ≥ 5 con el brain, o llevan 7+ días madurando) |
-| `mini_promover` | Sube una mini-nota como permanente (temas → conceptos) y marca la local |
+**Pensar** — `resurgir` es el corazón: le das un texto (una tarea, una duda, una
+idea a medias) y te devuelve las notas más conectadas con él. Solo aparece cuando
+hay solape real; si no hay nada, no inventa. `vault_buscar` es el grep de toda la
+vida, acotado para no inundar (20 resultados y te avisa si hubo más).
 
-Taller abajo, biblioteca arriba; promover es decisión del usuario.
+**Podar** — los grafos se pudren en silencio. `jardin` te enseña las notas
+huérfanas, los enlaces rotos, los conceptos que nadie definió, las notas
+sobreconectadas y los conceptos duplicados («Hábito» y «Habitos» partiendo los
+backlinks en dos). `concepto_fusionar` cose los nodos partidos.
 
-## Notas de diseño
+**Taller por proyecto** — cualquier repo puede tener su `brain/` local con
+apuntes crudos (`mini_nota`). `mini_listar` te dice cuáles se han ganado subir a
+la biblioteca (resuenan fuerte con lo que ya tienes, o llevan una semana
+madurando) y `mini_promover` los sube. Taller abajo, biblioteca arriba — y
+promover siempre es decisión tuya.
 
-- Las tools de solo lectura (`resurgir`, `jardin`, `vault_buscar`, `mini_listar`)
-  se declaran con `readOnlyHint`, y `concepto_fusionar` con `destructiveHint`,
-  para que el cliente pueda auto-aprobar unas y pedir confirmación para la otra.
-- Las respuestas son JSON compacto y acotado (`limite` + `truncado` en las
-  búsquedas): el contexto del cliente se paga en tokens.
-- Sin base de datos ni índice: solo Markdown con frontmatter. Todo lo que el
-  servidor sabe está en tus ficheros, legible y tuyo.
+## Leer notas: resources
+
+Cada nota del grafo es también un **resource MCP**, así que leerla entera no
+gasta una tool call (y en Claude Code puedes adjuntarla con `@`):
+
+```
+vault://lectura/{titulo}
+vault://nota/{titulo}
+vault://concepto/{nombre}
+```
+
+El patrón que funciona: buscar barato (`vault_buscar`, `resurgir`), leer entero
+solo lo que interesa (el resource).
+
+## Modo lexico y modo rag
+
+`resurgir` tiene dos motores, y el sistema te dice cuándo cambiar:
+
+- **`lexico`** (por defecto) — puntúa coincidencias donde más significan:
+  título ×3, temas ×2, cuerpo ×1. Directo y transparente; con un brain pequeño
+  o mediano es todo lo que necesitas.
+- **`rag`** — BM25 por *fragmentos* con stemming castellano: «hábito» encuentra
+  «hábitos», y en vez de decirte solo *qué* nota conecta, te devuelve **el
+  párrafo exacto que responde**, listo para usar como contexto. Pensado para
+  cuando el brain crece y las notas son largas.
+
+¿Cuál usar? No lo pienses: empieza en `lexico`. Cuando tu brain pase de 30 notas
+(configurable con `BRAIN_RAG_UMBRAL`), el propio `resurgir` te lo sugerirá en su
+respuesta. Puedes probar el rag en una sola llamada (`modo: "rag"`) o fijarlo
+para siempre con `BRAIN_MODO=rag`. Sin índices que reconstruir ni modelos que
+descargar: los dos motores releen el vault al vuelo, así que puedes seguir
+editando en Obsidian sin miedo.
+
+## Los principios (por si te preguntas por qué es así)
+
+- **La escasez es el significado.** Las sugerencias de conexión solo aparecen
+  cuando son fuertes (y como mucho dos). Enlazarlo todo con todo es lo mismo que
+  no enlazar nada.
+- **Enlazar es decisión tuya.** El sistema sugiere; tú decides. Ninguna conexión
+  se crea como efecto secundario.
+- **El vault manda.** El servidor relee siempre y no cachea: edita a mano, usa
+  Obsidian, sincroniza con lo que quieras. Escritura atómica y frontmatter
+  editado línea a línea — tu formato no se toca.
+- **El contexto se paga.** Respuestas en JSON compacto, búsquedas acotadas,
+  diagnósticos con techo. Las tools de solo lectura van marcadas (`readOnlyHint`)
+  y la única destructiva (`concepto_fusionar`) también, para que tu cliente pida
+  confirmación donde toca.
 
 ## Desarrollo
 
@@ -138,4 +156,4 @@ npm test
 
 ## Licencia
 
-MIT
+MIT. Úsalo, cámbialo, hazlo tuyo.

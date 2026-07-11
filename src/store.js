@@ -3,8 +3,8 @@
 //   clave (regex anclada ^clave:), sin re-serializar el documento (evita que Obsidian
 //   o el usuario vean reformateado lo que no tocamos).
 // - Escritura atómica: tmp + rename. Releer siempre, nunca cachear (Obsidian también escribe).
-import { access, mkdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
-import { dirname } from 'node:path';
+import { access, mkdir, readdir, readFile, rename, unlink, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import matter from 'gray-matter';
 
 // Serializa operaciones "leer -> calcular -> escribir" sobre la misma clave: el
@@ -37,6 +37,23 @@ export async function existeArchivo(ruta) {
 
 export async function leerCruda(ruta) {
   return readFile(ruta, 'utf8');
+}
+
+// Todos los .md bajo `dir`, recursivo. Best-effort: un directorio ilegible o
+// inexistente no rompe el listado, sencillamente no aporta ficheros.
+export async function listarMd(dir, out = []) {
+  let entradas;
+  try {
+    entradas = await readdir(dir, { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  for (const e of entradas) {
+    const ruta = join(dir, e.name);
+    if (e.isDirectory()) await listarMd(ruta, out);
+    else if (e.name.endsWith('.md')) out.push(ruta);
+  }
+  return out;
 }
 
 export async function leerNota(ruta) {

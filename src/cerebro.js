@@ -5,6 +5,7 @@ import { join, relative, basename, isAbsolute } from 'node:path';
 import matter from 'gray-matter';
 import * as fechas from './fechas.js';
 import * as store from './store.js';
+import { resurgirRag } from './rag.js';
 
 const FORMATOS = ['libro', 'articulo', 'video', 'curso'];
 const ESTADOS_LECTURA = ['por-leer', 'leyendo', 'terminada', 'abandonada'];
@@ -176,6 +177,7 @@ ${contenido}
         texto: `${titulo} ${contenido}`,
         limite: 3,
         excluir: relative(vault, ruta),
+        modo: 'lexico',
       });
       // Umbral de calidad: solo se sugiere lo que conecta FUERTE (score >= 5, el
       // mismo listón que califica a los mini-brains) y como mucho 2 — sugerir
@@ -240,28 +242,13 @@ export async function conceptoCrear(vault, { nombre, definicion, relacionados = 
   return { ok: true, nombre: canon, ruta };
 }
 
-async function listarMd(dir, out = []) {
-  let entradas;
-  try {
-    entradas = await readdir(dir, { withFileTypes: true });
-  } catch {
-    return out;
-  }
-  for (const e of entradas) {
-    const ruta = join(dir, e.name);
-    if (e.isDirectory()) await listarMd(ruta, out);
-    else if (e.name.endsWith('.md')) out.push(ruta);
-  }
-  return out;
-}
-
 // Grep estructurado sobre todo el vault: fichero, número de línea, la línea y su
 // contexto (una línea antes y después). `tipo` filtra por el frontmatter de la nota.
 // `limite` (por defecto 20) acota la respuesta: sin techo, una query genérica sobre
 // un vault grande volcaría miles de líneas en el contexto del cliente.
 export async function vaultBuscar(vault, { query, tipo, limite = 20 } = {}) {
   if (!query) throw new Error('vault_buscar exige "query"');
-  const ficheros = await listarMd(vault);
+  const ficheros = await store.listarMd(vault);
   const queryMin = query.toLowerCase();
   const resultados = [];
   let total = 0;
@@ -329,13 +316,25 @@ function tokenizar(texto) {
 // puntuación y el porqué. Es lo que hace que el vault "piense contigo": aparece solo
 // cuando hay solape real, ordenado por fuerza de la conexión.
 //   score = 3×hit en título + 2×hit en temas (frontmatter) + 1×hit en cuerpo (cap 3/término)
-export async function resurgir(vault, { texto, limite = 3, excluir } = {}) {
+// A partir de cuántas notas el modo lexico empieza a quedarse corto y resurgir
+// sugiere activar el rag. Con pocas notas, BM25 no aporta (poca estadística y el
+// título ya lo encuentra todo); con muchas, el fragmento citado vale oro.
+const UMBRAL_RAG = 30;
+
+export async function resurgir(vault, { texto, limite = 3, excluir, modo } = {}) {
+  // El modo se decide por llamada (`modo`), por entorno (BRAIN_MODO) o queda en
+  // lexico. Los llamadores internos (sugerencias, mini-brains) fijan lexico
+  // explícitamente: sus umbrales (score >= 5) están calibrados a ese scoring.
+  const modoEfectivo = modo || process.env.BRAIN_MODO || 'lexico';
+  if (!['lexico', 'rag'].includes(modoEfectivo)) throw new Error(`modo debe ser "lexico" o "rag", no "${modoEfectivo}"`);
+  if (modoEfectivo === 'rag') return resurgirRag(vault, { texto, limite, excluir });
+
   if (!texto) throw new Error('resurgir exige "texto"');
   const terminos = tokenizar(texto);
   if (!terminos.length) return { texto, resultados: [] };
 
   const dirs = ['40-Lecturas', '50-Notas', '60-Conceptos'];
-  const rutas = (await Promise.all(dirs.map((d) => listarMd(join(vault, d))))).flat();
+  const rutas = (await Promise.all(dirs.map((d) => store.listarMd(join(vault, d))))).flat();
   const leidas = await Promise.all(rutas.map(async (ruta) => {
     const rel = relative(vault, ruta);
     if (excluir && rel === excluir) return null;
@@ -366,7 +365,16 @@ export async function resurgir(vault, { texto, limite = 3, excluir } = {}) {
     if (score > 0) candidatos.push({ fichero: rel, titulo, score, terminos: motivos });
   }
   candidatos.sort((a, b) => b.score - a.score);
-  return { texto, resultados: candidatos.slice(0, limite) };
+  const salida = { texto, modo: 'lexico', resultados: candidatos.slice(0, limite) };
+
+  // Detección: cuando el brain ya es grande, el modo lexico se queda corto y el
+  // sistema lo dice — una vez por respuesta, sin insistir en modo rag.
+  const totalNotas = leidas.filter(Boolean).length;
+  const umbral = Number(process.env.BRAIN_RAG_UMBRAL) || UMBRAL_RAG;
+  if (totalNotas >= umbral) {
+    salida.sugerencia = `tu brain ya tiene ${totalNotas} notas: el modo rag (BM25 por fragmentos) afina más a este tamaño. Actívalo con BRAIN_MODO=rag, o pruébalo en una llamada con modo: "rag".`;
+  }
+  return salida;
 }
 
 // JARDÍN: la salud del grafo. Un second brain se pudre en silencio — notas huérfanas
@@ -383,7 +391,7 @@ export async function jardin(vault) {
   };
 
   const notas = new Map(); // titulo -> {rel, salientes:Set, cruda}
-  const rutasBrain = (await Promise.all(dirs.map((d) => listarMd(join(vault, d))))).flat();
+  const rutasBrain = (await Promise.all(dirs.map((d) => store.listarMd(join(vault, d))))).flat();
   for (const item of await Promise.all(rutasBrain.map(leer))) {
     if (!item) continue;
     const rel = relative(vault, item.ruta);
@@ -396,7 +404,7 @@ export async function jardin(vault) {
 
   // Entrantes desde TODO el vault (también semanas/meses/diarios enlazan al brain).
   const entrantes = new Map(); // titulo -> count
-  for (const item of await Promise.all((await listarMd(vault)).map(leer))) {
+  for (const item of await Promise.all((await store.listarMd(vault)).map(leer))) {
     if (!item) continue;
     for (const m of item.cruda.matchAll(/\[\[([^\]#|]+?)(?:[#|][^\]]*)?\]\]/g)) {
       const destino = m[1].trim();
@@ -485,7 +493,7 @@ export async function conceptoFusionar(vault, { duplicado, canonico } = {}) {
   let reemplazos = 0;
   const marcaDup = `[[${store.nombreArchivoSeguro(duplicado)}`;
   const marcaCanon = `[[${store.nombreArchivoSeguro(canonico)}`;
-  for (const ruta of await listarMd(vault)) {
+  for (const ruta of await store.listarMd(vault)) {
     if (ruta === rutaDup) continue;
     let cruda;
     try {
@@ -579,7 +587,7 @@ export async function miniListar(vault, { dir } = {}) {
     const dias = Math.max(0, Math.round((new Date(fechas.hoy()) - new Date(creada)) / 86400000));
     let resuena = null;
     try {
-      const r = await resurgir(vault, { texto: `${titulo} ${cruda}`, limite: 1 });
+      const r = await resurgir(vault, { texto: `${titulo} ${cruda}`, limite: 1, modo: 'lexico' });
       if (r.resultados[0]) resuena = { con: r.resultados[0].titulo, score: r.resultados[0].score };
     } catch {
       /* brain vacío: sin resonancia */

@@ -79,13 +79,14 @@ export const registro = {
   },
   resurgir: {
     description:
-      'El motor de resurfacing del second brain: dado un texto (tarea, foco, idea a medias), devuelve las notas/lecturas/conceptos más conectados, puntuados (título×3, temas×2, cuerpo×1) y con los términos que casaron. Aparece solo cuando hay solape real.',
+      'El motor de resurfacing del second brain: dado un texto (tarea, foco, idea a medias), devuelve las notas/lecturas/conceptos más conectados. Dos motores: lexico (puntúa título×3, temas×2, cuerpo×1) y rag (BM25 por fragmentos con stemming: devuelve el párrafo que responde). Por defecto lexico (o BRAIN_MODO); cuando el brain crece, la propia respuesta sugiere pasar a rag.',
     schema: {
       texto: z.string(),
       limite: z.number().optional().describe('máximo de resultados, por defecto 3'),
+      modo: z.enum(['lexico', 'rag']).optional().describe('motor a usar; por defecto BRAIN_MODO o lexico'),
     },
     annotations: { readOnlyHint: true },
-    ejecutar: (vault, { texto, limite } = {}) => cerebro.resurgir(vault, { texto, limite }),
+    ejecutar: (vault, { texto, limite, modo } = {}) => cerebro.resurgir(vault, { texto, limite, modo }),
   },
   jardin: {
     description:
