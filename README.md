@@ -4,7 +4,7 @@ Tu segundo cerebro, en tu Obsidian, hablando con tu asistente.
 
 Esto es un servidor MCP que convierte una carpeta de Markdown en un **second brain
 de verdad**: capturas lo que lees, lo conviertes en ideas con tus palabras, y esas
-ideas se conectan entre sí hasta formar un grafo que *piensa contigo* — cuando
+ideas se conectan entre sí hasta formar un grafo que *piensa contigo*: cuando
 trabajas en algo, las notas relacionadas aparecen solas.
 
 Todo en castellano. Todo en ficheros tuyos. Sin bases de datos, sin nube, sin magia
@@ -18,7 +18,7 @@ Le dices a tu asistente:
 > fuerza de voluntad»
 
 y él crea la lectura si no existía, guarda el apunte, y cuando esa idea madure la
-convierte en una nota permanente conectada al concepto `[[Hábitos]]` — que a su
+convierte en una nota permanente conectada al concepto `[[Hábitos]]`, que a su
 vez acumula todo lo que has pensado sobre el tema, venga del libro que venga.
 
 Semanas después, trabajando en otra cosa, preguntas por diseñar tu rutina de
@@ -101,7 +101,7 @@ Es idempotente: sobre un vault que ya existe no toca nada.
 
 | Variable | Qué hace | Por defecto |
 |---|---|---|
-| `BRAIN_VAULT` | La ruta de tu vault (obligatoria; también vale como primer argumento) | — |
+| `BRAIN_VAULT` | La ruta de tu vault (obligatoria; también vale como primer argumento) | nada |
 | `BRAIN_MODO` | Motor de `resurgir`: `lexico` o `rag` | `lexico` |
 | `BRAIN_RAG_UMBRAL` | A partir de cuántas notas puede sugerirse el modo rag | `50` |
 
@@ -115,31 +115,31 @@ tu-vault/
 ```
 
 La regla de oro: **nada entra suelto**. Cada idea se enlaza a su origen, a los
-conceptos que toca y —con moderación— a otras ideas. Y la moderación importa:
+conceptos que toca y, con moderación, a otras ideas. Y la moderación importa:
 máximo 2-3 notas relacionadas, cada enlace con su porqué escrito. Un cajón con
 doce enlaces no conecta nada; tres enlaces con motivo son un mapa.
 
 ## Qué sabe hacer
 
-**Capturar** — `lectura_crear` abre la ficha de un libro o artículo;
+**Capturar.** `lectura_crear` abre la ficha de un libro o artículo;
 `lectura_nota` guarda apuntes mientras lees («cap 3: ...»); cuando una idea es
 tuya de verdad, `nota_permanente` la sube a `50-Notas/` con sus temas convertidos
 en conceptos navegables. `nota_enlazar` une dos ideas y deja escrito *por qué*.
 
-**Pensar** — `resurgir` es el corazón: le das un texto (una tarea, una duda, una
+**Pensar.** `resurgir` es el corazón: le das un texto (una tarea, una duda, una
 idea a medias) y te devuelve las notas más conectadas con él. Solo aparece cuando
 hay solape real; si no hay nada, no inventa. `vault_buscar` es el grep de toda la
 vida, acotado para no inundar (20 resultados y te avisa si hubo más).
 
-**Podar** — los grafos se pudren en silencio. `jardin` te enseña las notas
+**Podar.** Los grafos se pudren en silencio. `jardin` te enseña las notas
 huérfanas, los enlaces rotos, los conceptos que nadie definió, las notas
 sobreconectadas y los conceptos duplicados («Hábito» y «Habitos» partiendo los
 backlinks en dos). `concepto_fusionar` cose los nodos partidos.
 
-**Taller por proyecto** — cualquier repo puede tener su `brain/` local con
+**Taller por proyecto.** Cualquier repo puede tener su `brain/` local con
 apuntes crudos (`mini_nota`). `mini_listar` te dice cuáles se han ganado subir a
 la biblioteca (resuenan fuerte con lo que ya tienes, o llevan una semana
-madurando) y `mini_promover` los sube. Taller abajo, biblioteca arriba — y
+madurando) y `mini_promover` los sube. Taller abajo, biblioteca arriba: y
 promover siempre es decisión tuya.
 
 ## La ingesta: un solo gesto
@@ -151,15 +151,15 @@ No hace falta que te aprendas las tools. Dile a tu asistente:
 > «apunta esto que estoy escribiendo»
 
 y la ingesta se dispara según toque. El servidor trae el procedimiento escrito
-(prompt MCP `ingerir` — en Claude Code aparece como comando
+(prompt MCP `ingerir`; en Claude Code aparece como comando
 `/mcp__second-brain__ingerir`): clasifica el texto (¿lectura con fuente, idea
-tuya, apunte de taller?), aplica el modo — `directo` guarda íntegro, `destilar`
+tuya, apunte de taller?), aplica el modo (`directo` guarda íntegro, `destilar`
 extrae las 1-3 ideas fuertes *en tus palabras* y te las enseña antes de crear
-nada, `auto` decide y te lo dice —, identifica 2-4 conceptos (prefiriendo los
+nada, `auto` decide y te lo dice), identifica 2-4 conceptos (prefiriendo los
 que ya existen en tu grafo antes que inventar sinónimos), y teje. Las decisiones
 son tuyas y están marcadas como tales: qué ideas entran y qué conexiones se
 crean. Vale para un párrafo pegado, un capítulo, o ese documento de Word que
-estás escribiendo — pégalo o pásale el fichero.
+estás escribiendo: pégalo o pásale el fichero.
 
 ## Leer notas: resources
 
@@ -191,32 +191,32 @@ Dos detalles útiles:
   trata como enlaces reales, pero para verlos en el graph view activa
   «Propiedades» en los ajustes del grafo.
 
-> **¿Y Notion?** No. Este servidor trabaja sobre ficheros Markdown locales — esa
+> **¿Y Notion?** No. Este servidor trabaja sobre ficheros Markdown locales. Esa
 > es la gracia: tus datos son tuyos, se abren con cualquier editor y el grafo va
 > a la velocidad del disco, no de una API. Obsidian tampoco es obligatorio (vale
 > cualquier carpeta `.md`); es solo el mejor visor. Si vienes de Notion: exporta
-> tus notas como Markdown y suéltalas en el vault — eso sí funciona.
+> tus notas como Markdown y suéltalas en el vault, y eso sí funciona.
 
 ## Modo lexico y modo rag
 
 `resurgir` tiene dos motores, y el sistema te dice cuándo cambiar:
 
-- **`lexico`** (por defecto) — puntúa coincidencias donde más significan:
+- **`lexico`** (por defecto): puntúa coincidencias donde más significan:
   título ×3, temas ×2, cuerpo ×1. Directo y transparente; con un brain pequeño
   o mediano es todo lo que necesitas.
-- **`rag`** — BM25 por *fragmentos* con stemming castellano: «hábito» encuentra
+- **`rag`**: BM25 por *fragmentos* con stemming castellano: «hábito» encuentra
   «hábitos», y en vez de decirte solo *qué* nota conecta, te devuelve **el
   párrafo exacto que responde**, listo para usar como contexto. Pensado para
   cuando el brain crece y las notas son largas.
 
 ¿Cuál usar? No lo pienses: empieza en `lexico` y deja que el sistema te guíe.
-La sugerencia de pasar a rag aparece **solo cuando toca** — cuando se dan las
+La sugerencia de pasar a rag aparece **solo cuando toca**, cuando se dan las
 dos cosas a la vez:
 
 1. tu brain ya es un puñado grande de notas (50+, configurable con
    `BRAIN_RAG_UMBRAL`), **y**
 2. la búsqueda que acabas de hacer volvió floja en léxico (sin resultados o por
-   debajo del listón de conexión fuerte) — es decir, justo el momento en que el
+   debajo del listón de conexión fuerte); es decir, justo el momento en que el
    rag habría ayudado.
 
 Y una sola vez por sesión: te lo dice, te explica el porqué, y no vuelve a
@@ -235,7 +235,7 @@ Obsidian sin miedo.
   se crea como efecto secundario.
 - **El vault manda.** El servidor relee siempre y no cachea: edita a mano, usa
   Obsidian, sincroniza con lo que quieras. Escritura atómica y frontmatter
-  editado línea a línea — tu formato no se toca.
+  editado línea a línea: tu formato no se toca.
 - **El contexto se paga.** Respuestas en JSON compacto, búsquedas acotadas,
   diagnósticos con techo. Las tools de solo lectura van marcadas (`readOnlyHint`)
   y la única destructiva (`concepto_fusionar`) también, para que tu cliente pida

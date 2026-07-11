@@ -232,8 +232,8 @@ export async function notaEnlazar(vault, { titulo, con, bidireccional = true, mo
   // El motivo solo se escribe cuando el enlace es NUEVO (idempotencia: repetir la
   // llamada no duplica la línea).
   if (motivo && motivo.trim()) {
-    if (cambioA) await store.appendEnSeccion(rutaA, 'Conexiones', `- [[${store.nombreArchivoSeguro(con)}]] — ${motivo.trim()}`);
-    if (cambioB) await store.appendEnSeccion(rutaB, 'Conexiones', `- [[${store.nombreArchivoSeguro(titulo)}]] — ${motivo.trim()}`);
+    if (cambioA) await store.appendEnSeccion(rutaA, 'Conexiones', `- [[${store.nombreArchivoSeguro(con)}]]: ${motivo.trim()}`);
+    if (cambioB) await store.appendEnSeccion(rutaB, 'Conexiones', `- [[${store.nombreArchivoSeguro(titulo)}]]: ${motivo.trim()}`);
   }
   return { ok: true, enlazadas: [titulo, con], bidireccional, nuevo: cambioA || cambioB };
 }
@@ -392,7 +392,7 @@ export async function resurgir(vault, { texto, limite = 3, excluir, modo } = {})
     const porQue = salida.resultados.length
       ? `y esta búsqueda salió floja en modo lexico (mejor score: ${topScore})`
       : 'y esta búsqueda no encontró nada en modo lexico';
-    salida.sugerencia = `este brain ya tiene ${totalNotas} notas ${porQue}. Repite la misma consulta con modo: "rag" — BM25 por fragmentos: casa singular/plural y devuelve el párrafo que responde. Si convence, se fija con BRAIN_MODO=rag; si no, no ha pasado nada: los dos motores leen el mismo vault.`;
+    salida.sugerencia = `este brain ya tiene ${totalNotas} notas ${porQue}. Repite la misma consulta con modo: "rag" (BM25 por fragmentos: casa singular/plural y devuelve el párrafo que responde). Si convence, se fija con BRAIN_MODO=rag; si no, no ha pasado nada: los dos motores leen el mismo vault.`;
   }
   return salida;
 }

@@ -270,8 +270,8 @@ test('nota_enlazar con motivo lo escribe en ## Conexiones de ambas, y repetir no
   assert.equal(r.nuevo, true);
   const a = await readFile(join(vault, '50-Notas', 'Idea A.md'), 'utf8');
   const b = await readFile(join(vault, '50-Notas', 'Idea B.md'), 'utf8');
-  assert.match(a, /## Conexiones\n- \[\[Idea B\]\] — ambas hablan del límite/);
-  assert.match(b, /## Conexiones\n- \[\[Idea A\]\] — ambas hablan del límite/);
+  assert.match(a, /## Conexiones\n- \[\[Idea B\]\]: ambas hablan del límite/);
+  assert.match(b, /## Conexiones\n- \[\[Idea A\]\]: ambas hablan del límite/);
   // repetir: idempotente, sin línea duplicada
   const r2 = await c.notaEnlazar(vault, { titulo: 'Idea A', con: 'Idea B', motivo: 'ambas hablan del límite' });
   assert.equal(r2.nuevo, false);

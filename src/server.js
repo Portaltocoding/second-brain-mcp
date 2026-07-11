@@ -28,15 +28,15 @@ if (process.argv[2] === '--init') {
 
 Tres carpetas, un grafo:
 
-- \`40-Lecturas/\` — lo que entra: libros, artículos, vídeos, cursos.
-- \`50-Notas/\` — lo que queda: ideas permanentes, con tu voz y tu título.
-- \`60-Conceptos/\` — lo que conecta: cada tema es un nodo con backlinks.
+- \`40-Lecturas/\`: lo que entra. Libros, artículos, vídeos, cursos.
+- \`50-Notas/\`: lo que queda. Ideas permanentes, con tu voz y tu título.
+- \`60-Conceptos/\`: lo que conecta. Cada tema es un nodo con backlinks.
 
 Pídele a tu asistente:
 
-- «estoy leyendo X, apunta esto» — captura sin salir de lo que hacías.
-- «¿qué sé yo sobre X?» — resurgir trae las notas conectadas.
-- «¿cómo está el jardín?» — huérfanas, enlaces rotos y duplicados, para podar.
+- «estoy leyendo X, apunta esto»: captura sin salir de lo que hacías.
+- «¿qué sé yo sobre X?»: resurgir trae las notas conectadas.
+- «¿cómo está el jardín?»: huérfanas, enlaces rotos y duplicados, para podar.
 `;
   const creada = await crearSiNoExiste(join(destino, 'Inicio.md'), portada);
   console.error(`second-brain-mcp: vault listo en ${destino}${creada ? '' : ' (Inicio.md ya existía, no se toca)'}`);
@@ -159,7 +159,7 @@ PROCEDIMIENTO:
    - destilar: extrae las 1-3 ideas más fuertes, cada una como posible nota independiente, escritas EN MIS PALABRAS, no las del texto. Enséñamelas antes de crear nada. DECISIÓN: yo apruebo cuáles entran.
    - auto: si el texto es corto y ya suena a idea → directo; si es largo o ajeno → propón destilar. Dime qué elegiste en una línea.
 
-3. CONCEPTOS: identifica 2-4 conceptos clave, no más — la escasez es el significado. Prefiere conceptos que YA existan en el grafo (compruébalo con vault_buscar o resurgir) antes que inventar sinónimos nuevos. Pásalos como temas.
+3. CONCEPTOS: identifica 2-4 conceptos clave, no más: la escasez es el significado. Prefiere conceptos que YA existan en el grafo (compruébalo con vault_buscar o resurgir) antes que inventar sinónimos nuevos. Pásalos como temas.
 
 4. TEJE: crea con las tools (nota_permanente devuelve sugerencias de conexión). DECISIÓN: propónme las sugerencias fuertes; solo enlazas (nota_enlazar, con motivo de una frase) las que yo confirme.
 
