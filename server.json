@@ -1,0 +1,35 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
+  "name": "io.github.Portaltocoding/second-brain-mcp",
+  "description": "Second brain en Obsidian: lecturas, notas permanentes, conceptos como nodos, resurfacing lexico o rag y salud del grafo. En castellano.",
+  "repository": {
+    "url": "https://github.com/Portaltocoding/second-brain-mcp",
+    "source": "github"
+  },
+  "version": "0.1.1",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@toportal/second-brain-mcp",
+      "version": "0.1.1",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "BRAIN_VAULT",
+          "description": "Ruta al vault de Obsidian (carpeta de Markdown)",
+          "isRequired": true,
+          "format": "filepath"
+        },
+        {
+          "name": "BRAIN_MODO",
+          "description": "Motor de resurgir: lexico o rag",
+          "isRequired": false,
+          "format": "string"
+        }
+      ]
+    }
+  ]
+}
