@@ -70,6 +70,19 @@ frase que lo dispara:
 
 ## Instalación
 
+### Sin terminal: doble clic y listo
+
+Si usas **Claude Desktop** y no quieres saber nada de comandos ni de JSON,
+descarga
+[`second-brain.mcpb`](https://github.com/Portaltocoding/second-brain-mcp/releases/latest/download/second-brain.mcpb)
+y haz doble clic: Claude Desktop lo abre, te pide elegir la carpeta donde
+vivirá tu cerebro (tu vault de Obsidian si tienes, o una carpeta vacía
+cualquiera) y ya está. No necesitas instalar Node ni tocar ningún fichero de
+configuración. Y si además quieres ver tu cerebro dibujado como un grafo,
+instala [Obsidian](https://obsidian.md) y abre esa misma carpeta como vault.
+
+### Con terminal
+
 Necesitas Node 18 o más nuevo y una carpeta para el vault (puede ser tu vault de
 Obsidian de siempre: el servidor solo escribe en tres subcarpetas y no toca nada más).
 

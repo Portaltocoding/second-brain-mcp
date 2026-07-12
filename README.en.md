@@ -75,6 +75,19 @@ that triggers them:
 
 ## Install
 
+### No terminal: double click and done
+
+If you use **Claude Desktop** and want nothing to do with commands or JSON,
+download
+[`second-brain.mcpb`](https://github.com/Portaltocoding/second-brain-mcp/releases/latest/download/second-brain.mcpb)
+and double-click it: Claude Desktop opens it, asks you to pick the folder
+where your brain will live (your Obsidian vault if you have one, or any empty
+folder) and that is it. No Node install, no config files. And if you also want
+to see your brain drawn as a graph, install [Obsidian](https://obsidian.md)
+and open that same folder as a vault.
+
+### With a terminal
+
 You need Node 18+ and a folder for the vault (your existing Obsidian vault
 works: the server only writes into three subfolders and touches nothing else).
 

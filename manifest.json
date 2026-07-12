@@ -1,0 +1,44 @@
+{
+  "manifest_version": "0.2",
+  "name": "second-brain-mcp",
+  "display_name": "Second Brain",
+  "version": "0.1.1",
+  "description": "Tu segundo cerebro en ficheros Markdown: capturas lo que lees, lo conviertes en ideas tuyas y se conectan en un grafo que piensa contigo. En castellano.",
+  "long_description": "Servidor MCP que convierte una carpeta de Markdown (tu vault de Obsidian, si lo usas) en un second brain de verdad: lecturas, notas permanentes, conceptos como nodos reales, resurfacing de ideas relacionadas y salud del grafo. Todo en ficheros tuyos, sin bases de datos ni nube.",
+  "author": {
+    "name": "Carlos",
+    "url": "https://github.com/Portaltocoding"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Portaltocoding/second-brain-mcp"
+  },
+  "homepage": "https://github.com/Portaltocoding/second-brain-mcp",
+  "license": "MIT",
+  "keywords": ["second-brain", "obsidian", "zettelkasten", "pkm", "castellano"],
+  "server": {
+    "type": "node",
+    "entry_point": "src/server.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/src/server.js"],
+      "env": {
+        "BRAIN_VAULT": "${user_config.vault}"
+      }
+    }
+  },
+  "user_config": {
+    "vault": {
+      "type": "directory",
+      "title": "Carpeta de tu cerebro",
+      "description": "La carpeta donde vivirán tus notas (si usas Obsidian, elige tu vault). Puede estar vacía: el sistema crea lo que haga falta.",
+      "required": true
+    }
+  },
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}
