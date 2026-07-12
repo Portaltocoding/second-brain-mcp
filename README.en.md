@@ -2,6 +2,7 @@
 
 [Español](README.md) · **English**
 
+![npm](https://img.shields.io/npm/v/%40toportal%2Fsecond-brain-mcp)
 ![tests](https://github.com/Portaltocoding/second-brain-mcp/actions/workflows/test.yml/badge.svg)
 ![node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen)
 ![license](https://img.shields.io/badge/license-MIT-blue)
@@ -82,7 +83,7 @@ With **Claude Code**, at user scope (available in all your projects):
 ```bash
 claude mcp add --scope user second-brain \
   --env BRAIN_VAULT=/path/to/your/vault \
-  -- npx -y second-brain-mcp
+  -- npx -y @toportal/second-brain-mcp
 ```
 
 With any other MCP client:
@@ -92,7 +93,7 @@ With any other MCP client:
   "mcpServers": {
     "second-brain": {
       "command": "npx",
-      "args": ["-y", "second-brain-mcp"],
+      "args": ["-y", "@toportal/second-brain-mcp"],
       "env": { "BRAIN_VAULT": "/path/to/your/vault" }
     }
   }
@@ -103,7 +104,7 @@ That is it. The first note creates whatever folders are missing. If you prefer
 the vault scaffolded from the start (folders plus a home page):
 
 ```bash
-npx -y second-brain-mcp --init /path/to/your/vault
+npx -y @toportal/second-brain-mcp --init /path/to/your/vault
 ```
 
 It is idempotent: on an existing vault it changes nothing.

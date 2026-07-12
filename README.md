@@ -2,6 +2,7 @@
 
 **Español** · [English](README.en.md)
 
+![npm](https://img.shields.io/npm/v/%40toportal%2Fsecond-brain-mcp)
 ![tests](https://github.com/Portaltocoding/second-brain-mcp/actions/workflows/test.yml/badge.svg)
 ![node](https://img.shields.io/badge/node-%E2%89%A518-brightgreen)
 ![license](https://img.shields.io/badge/license-MIT-blue)
@@ -77,7 +78,7 @@ Con **Claude Code**, a nivel de usuario (disponible en todos tus proyectos):
 ```bash
 claude mcp add --scope user second-brain \
   --env BRAIN_VAULT=/ruta/a/tu/vault \
-  -- npx -y second-brain-mcp
+  -- npx -y @toportal/second-brain-mcp
 ```
 
 Con cualquier otro cliente MCP:
@@ -87,7 +88,7 @@ Con cualquier otro cliente MCP:
   "mcpServers": {
     "second-brain": {
       "command": "npx",
-      "args": ["-y", "second-brain-mcp"],
+      "args": ["-y", "@toportal/second-brain-mcp"],
       "env": { "BRAIN_VAULT": "/ruta/a/tu/vault" }
     }
   }
@@ -98,7 +99,7 @@ Y listo. La primera nota crea las carpetas que hagan falta. Si prefieres dejar
 el vault montado desde el principio (carpetas + portada), hay andamiaje:
 
 ```bash
-npx -y second-brain-mcp --init /ruta/a/tu/vault
+npx -y @toportal/second-brain-mcp --init /ruta/a/tu/vault
 ```
 
 Es idempotente: sobre un vault que ya existe no toca nada.

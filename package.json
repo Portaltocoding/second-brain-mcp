@@ -1,5 +1,5 @@
 {
-  "name": "second-brain-mcp",
+  "name": "@toportal/second-brain-mcp",
   "version": "0.1.0",
   "description": "Servidor MCP para un second brain en Obsidian: lecturas, notas permanentes, conceptos como nodos reales, resurfacing y salud del grafo. En castellano.",
   "type": "module",
@@ -9,8 +9,18 @@
   "files": [
     "src",
     "README.md",
+    "README.en.md",
     "LICENSE"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Portaltocoding/second-brain-mcp.git"
+  },
+  "homepage": "https://github.com/Portaltocoding/second-brain-mcp#readme",
+  "bugs": {
+    "url": "https://github.com/Portaltocoding/second-brain-mcp/issues"
+  },
+  "author": "Carlos (https://github.com/Portaltocoding)",
   "scripts": {
     "test": "node --test"
   },
@@ -21,7 +31,9 @@
     "second-brain",
     "zettelkasten",
     "pkm",
-    "claude"
+    "claude",
+    "spanish",
+    "castellano"
   ],
   "license": "MIT",
   "engines": {
