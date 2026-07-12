@@ -132,7 +132,7 @@ test('el prompt ingerir existe y devuelve el procedimiento con el texto y el mod
   await client.connect(transport);
   try {
     const { prompts } = await client.listPrompts();
-    assert.deepEqual(prompts.map((p) => p.name).sort(), ['empezar', 'ingerir']);
+    assert.deepEqual(prompts.map((p) => p.name).sort(), ['empezar', 'ingerir', 'ingest', 'start']);
 
     const r = await client.getPrompt({
       name: 'ingerir',
@@ -157,6 +157,13 @@ test('el prompt ingerir existe y devuelve el procedimiento con el texto y el mod
     assert.match(guia, /jardin/);
     const sinContexto = await client.getPrompt({ name: 'empezar', arguments: {} });
     assert.doesNotMatch(sinContexto.messages[0].content.text, /CONTEXTO QUE YA SABES/);
+    assert.match(sinContexto.messages[0].content.text, /Lecturas.*Ideas.*Conceptos/s); // el diagrama del paso 1
+
+    // los alias ingleses devuelven el mismo procedimiento
+    const alias = await client.getPrompt({ name: 'start', arguments: {} });
+    assert.equal(alias.messages[0].content.text, sinContexto.messages[0].content.text);
+    const aliasIngesta = await client.getPrompt({ name: 'ingest', arguments: { texto: 'algo' } });
+    assert.match(aliasIngesta.messages[0].content.text, /MODO: auto/);
   } finally {
     await client.close();
   }

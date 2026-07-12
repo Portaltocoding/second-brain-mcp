@@ -17,7 +17,8 @@ related notes show up on their own.
 > **Heads-up:** the tool names and their vocabulary are in Spanish, on purpose.
 > This project was born in Spanish and keeps its voice; your assistant handles
 > the language for you either way (ask in English, it calls `resurgir` just
-> fine). This page translates everything else.
+> fine). The two user-facing commands do have English aliases: `start`
+> (`empezar`) and `ingest` (`ingerir`). This page translates everything else.
 
 Everything lives in your files. No databases, no cloud, no magic you cannot
 open with a text editor.
@@ -133,8 +134,8 @@ It is idempotent: on an existing vault it changes nothing.
 ## Your first session
 
 You do not have to make it up: tell your assistant "onboard me into my second
-brain" (that is the `empezar` prompt; in Claude Code it shows up as the
-`/mcp__second-brain__empezar` command) and it walks you through it: checks the
+brain" (that is the `start` prompt, alias of `empezar`; in Claude Code it shows up
+as the `/mcp__second-brain__start` command) and it walks you through it: checks the
 state of your vault, plants the first reading and the first idea with you in
 your own words, shows you what `resurgir` returns with your material, and
 leaves you the cheat sheet of the three daily gestures. If the vault already
@@ -230,8 +231,8 @@ You do not need to learn the tools. Tell your assistant:
 > "note down what I'm writing"
 
 and ingestion fires accordingly. The server ships the written procedure (MCP
-prompt `ingerir`; in Claude Code it appears as the
-`/mcp__second-brain__ingerir` command): it classifies the text (reading with a
+prompt `ingerir`, English alias `ingest`; in Claude Code it appears as the
+`/mcp__second-brain__ingest` command): it classifies the text (reading with a
 source? your own idea? workshop note?), applies the mode (`directo` stores it
 whole, `destilar` extracts the 1-3 strongest ideas *in your words* and shows
 them before creating anything, `auto` decides and tells you), picks 2-4

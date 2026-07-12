@@ -121,23 +121,33 @@ for (const { nombre, dir, descripcion } of RESOURCES) {
 // El servidor no piensa (eso es del asistente), pero sí ORGANIZA: este prompt es
 // el procedimiento de ingesta escrito, para que «añade esto a mi second brain»
 // salga igual de bien en cualquier cliente y cualquier día.
-server.registerPrompt(
-  'ingerir',
+// Cada prompt se registra dos veces: nombre castellano y alias inglés. El
+// procedimiento interno queda en castellano (lo lee el modelo, que responde en
+// el idioma del usuario); lo que sí se traduce es lo que el usuario ve al
+// elegir comando: la descripción.
+function registrarPromptDual(nombres, descripciones, argsSchema, construir) {
+  nombres.forEach((nombre, i) => {
+    server.registerPrompt(nombre, { description: descripciones[i], argsSchema }, construir);
+  });
+}
+
+registrarPromptDual(
+  ['ingerir', 'ingest'],
+  [
+    'Ingiere un texto en el second brain de forma organizada: clasifica (lectura/idea propia/apunte de taller), extrae conceptos con moderación, y teje sin enlazar nada sin permiso. modo: directo (guardar íntegro), destilar (solo lo importante) o auto.',
+    'Ingest a text into the second brain in an organized way: classify it (reading/own idea/workshop note), extract concepts sparingly, and weave without linking anything without permission. modo: directo (store whole), destilar (distill the key ideas) or auto. English alias of `ingerir`.',
+  ],
   {
-    description:
-      'Ingiere un texto en el second brain de forma organizada: clasifica (lectura/idea propia/apunte de taller), extrae conceptos con moderación, y teje sin enlazar nada sin permiso. modo: directo (guardar íntegro), destilar (solo lo importante) o auto.',
-    argsSchema: {
-      texto: z.string().describe('el texto a ingerir (pegado, dictado o leído de un fichero)'),
-      modo: z.enum(['directo', 'destilar', 'auto']).optional().describe('por defecto auto: decide y confirma'),
-      fuente: z.string().optional().describe('si viene de una lectura: título (y autor si se sabe)'),
-    },
+    texto: z.string().describe('el texto a ingerir (pegado, dictado o leído de un fichero)'),
+    modo: z.enum(['directo', 'destilar', 'auto']).optional().describe('por defecto auto: decide y confirma'),
+    fuente: z.string().optional().describe('si viene de una lectura: título (y autor si se sabe)'),
   },
   ({ texto, modo = 'auto', fuente }) => ({
     messages: [{
       role: 'user',
       content: {
         type: 'text',
-        text: `Vas a ingerir un texto en mi second brain (MCP second-brain). Sigue este procedimiento; los pasos marcados DECISIÓN son míos, no los tomes por mí.
+        text: `Vas a ingerir un texto en mi second brain (MCP second-brain). Responde siempre en el idioma en el que yo te hable. Sigue este procedimiento; los pasos marcados DECISIÓN son míos, no los tomes por mí.
 
 MODO: ${modo}
 FUENTE: ${fuente || 'ninguna declarada'}
@@ -170,40 +180,54 @@ PROCEDIMIENTO:
   }),
 );
 
+
 // ── Prompt de onboarding: la primera sesión, guiada ──────────────────────────
 // El momento más frágil es el vault vacío: el usuario no sabe qué pedir. Este
 // prompt es esa primera conversación escrita: mirar el estado, plantar la
 // primera lectura y la primera idea, y enseñar los tres gestos del día a día.
-server.registerPrompt(
-  'empezar',
+registrarPromptDual(
+  ['empezar', 'start'],
+  [
+    'Onboarding guiado del second brain: explica cómo funciona con un diagrama sencillo, mira el estado del vault, planta la primera lectura y la primera idea con el usuario, enseña resurgir con su propio material y deja los tres gestos del día a día. Vale también para un vault con contenido: entonces es un tour.',
+    'Guided second brain onboarding: explains how it works with a simple diagram, checks the vault state, plants the first reading and the first idea with the user, shows resurgir on their own material and leaves the three daily gestures. Also works on a vault with content: then it is a tour. English alias of `empezar`.',
+  ],
   {
-    description:
-      'Onboarding guiado del second brain: mira el estado del vault, planta la primera lectura y la primera idea con el usuario, enseña resurgir con su propio material y deja los tres gestos del día a día. Vale también para un vault con contenido: entonces es un tour.',
-    argsSchema: {
-      contexto: z.string().optional().describe('opcional: qué está leyendo o pensando el usuario ahora mismo, si ya se sabe'),
-    },
+    contexto: z.string().optional().describe('opcional: qué está leyendo o pensando el usuario ahora mismo, si ya se sabe'),
   },
   ({ contexto }) => ({
     messages: [{
       role: 'user',
       content: {
         type: 'text',
-        text: `Vas a hacerme el onboarding de mi second brain (MCP second-brain). Es una conversación, no un formulario: un paso cada vez, corto, y los marcados DECISIÓN son míos.
+        text: `Vas a hacerme el onboarding de mi second brain (MCP second-brain). Responde siempre en el idioma en el que yo te hable. Es una conversación, no un formulario: un paso cada vez, corto, y los marcados DECISIÓN son míos.
 
 ${contexto ? `CONTEXTO QUE YA SABES: ${contexto}\n` : ''}
 PROCEDIMIENTO:
 
-1. MIRA EL ESTADO con jardin. Si el vault ya tiene notas, esto no es un onboarding sino un tour: enséñame en 3 líneas qué hay (cuántas lecturas, ideas y conceptos, y si el jardín pide poda), haz un resurgir con algo de mi propio contenido para que vea la magia, y salta al paso 5.
+1. EXPLÍCAME QUÉ ES, en 4-5 líneas amables y sin jerga: una carpeta de notas normales donde lo que leo se convierte en ideas mías, y las ideas se conectan solas cuando las necesito. Acompáñalo de este diagrama, tal cual (traduce las etiquetas si te hablo en otro idioma):
 
-2. LA PRIMERA SEMILLA. Pregúntame UNA cosa: qué estoy leyendo ahora, o qué idea me ha rondado la cabeza esta semana. DECISIÓN: espera mi respuesta, no inventes contenido de ejemplo.
+\`\`\`
+   lo que lees          lo que piensas          lo que conecta
+  ┌────────────┐  destilar  ┌──────────┐  temas  ┌─────────────┐
+  │  Lecturas  │ ─────────▶ │  Ideas   │ ──────▶ │  Conceptos  │
+  └────────────┘            └──────────┘         └─────────────┘
+        ▲                        ▲                      │
+        │ «apunta esto»          │ «añade esto»         │
+        └── tú ◀──────────────── «¿qué sé yo de X?» ◀───┘
+                     (las ideas vuelven solas: resurgir)
+\`\`\`
+
+2. MIRA EL ESTADO con jardin. Si el vault ya tiene notas, esto no es un onboarding sino un tour: enséñame en 3 líneas qué hay (cuántas lecturas, ideas y conceptos, y si el jardín pide poda), haz un resurgir con algo de mi propio contenido para que vea la magia, y salta al paso 6.
+
+3. LA PRIMERA SEMILLA. Pregúntame UNA cosa: qué estoy leyendo ahora, o qué idea me ha rondado la cabeza esta semana. DECISIÓN: espera mi respuesta, no inventes contenido de ejemplo.
    - Si es algo que leo → lectura_crear con 1-2 temas, y pídeme un apunte concreto para lectura_nota.
-   - Si es una idea mía → salta directo al paso 3 con ella.
+   - Si es una idea mía → salta directo al paso 4 con ella.
 
-3. LA PRIMERA IDEA PERMANENTE. De lo que te conté, propón UNA idea destilada en mis palabras, con el título como afirmación (no «Sobre los hábitos» sino «El entorno decide por ti») y 1-2 conceptos. DECISIÓN: yo apruebo o corrijo el título antes de nota_permanente.
+4. LA PRIMERA IDEA PERMANENTE. De lo que te conté, propón UNA idea destilada en mis palabras, con el título como afirmación (no «Sobre los hábitos» sino «El entorno decide por ti») y 1-2 conceptos. DECISIÓN: yo apruebo o corrijo el título antes de nota_permanente.
 
-4. LA MAGIA. Haz un resurgir con una pregunta relacionada con lo que acabo de plantar, y enséñame qué vuelve. Con una sola nota volverá poco: dilo con honestidad («esto con 30 notas es otra cosa») en vez de fingir.
+5. LA MAGIA. Haz un resurgir con una pregunta relacionada con lo que acabo de plantar, y enséñame qué vuelve. Con una sola nota volverá poco: dilo con honestidad («esto con 30 notas es otra cosa») en vez de fingir.
 
-5. LOS TRES GESTOS. Cierra dejándome esto, tal cual, como chuleta:
+6. LOS TRES GESTOS. Cierra dejándome esto, tal cual, como chuleta:
    - «estoy leyendo X, apunta esto» → captura sin salir de lo que hacías
    - «añade esto a mi second brain» (directo o lo más importante) → ingesta
    - «¿qué sé yo sobre X?» → resurgir
