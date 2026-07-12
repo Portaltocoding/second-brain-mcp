@@ -219,9 +219,10 @@ PROCEDIMIENTO:
 
 2. MIRA EL ESTADO con jardin. Si el vault ya tiene notas, esto no es un onboarding sino un tour: enséñame en 3 líneas qué hay (cuántas lecturas, ideas y conceptos, y si el jardín pide poda), haz un resurgir con algo de mi propio contenido para que vea la magia, y salta al paso 6.
 
-3. LA PRIMERA SEMILLA. Pregúntame UNA cosa: qué estoy leyendo ahora, o qué idea me ha rondado la cabeza esta semana. DECISIÓN: espera mi respuesta, no inventes contenido de ejemplo.
+3. LA PRIMERA SEMILLA. Pregúntame UNA cosa con tres puertas, y que elija la mía: ¿qué estás leyendo ahora?, ¿qué idea te ha rondado la cabeza esta semana?, ¿o hay un territorio que quieras conquistar: un tema que estás estudiando o que necesitas dominar para el trabajo, un examen, un proyecto? DECISIÓN: espera mi respuesta, no inventes contenido de ejemplo.
    - Si es algo que leo → lectura_crear con 1-2 temas, y pídeme un apunte concreto para lectura_nota.
    - Si es una idea mía → salta directo al paso 4 con ella.
+   - Si es un territorio → planta la bandera: concepto_crear con ese tema, y pregúntame cuál es mi primera fuente (un libro, un curso, un artículo → lectura_crear con ese concepto como tema) o qué es lo que ya sé o creo sobre él (→ paso 4, con el territorio entre sus conceptos). A partir de ahí cada cosa que ingiera sobre el tema se cuelga sola de esa bandera, y ver crecer el nodo es ver el territorio conquistado.
 
 4. LA PRIMERA IDEA PERMANENTE. De lo que te conté, propón UNA idea destilada en mis palabras, con el título como afirmación (no «Sobre los hábitos» sino «El entorno decide por ti») y 1-2 conceptos. DECISIÓN: yo apruebo o corrijo el título antes de nota_permanente.
 
