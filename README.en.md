@@ -130,6 +130,16 @@ It is idempotent: on an existing vault it changes nothing.
 | `BRAIN_MODO` | `resurgir` engine: `lexico` or `rag` | `lexico` |
 | `BRAIN_RAG_UMBRAL` | Note count from which rag mode may be suggested | `50` |
 
+## Your first session
+
+You do not have to make it up: tell your assistant "onboard me into my second
+brain" (that is the `empezar` prompt; in Claude Code it shows up as the
+`/mcp__second-brain__empezar` command) and it walks you through it: checks the
+state of your vault, plants the first reading and the first idea with you in
+your own words, shows you what `resurgir` returns with your material, and
+leaves you the cheat sheet of the three daily gestures. If the vault already
+has content it does not treat you as new: it gives you a tour instead.
+
 ## Try it in 30 seconds
 
 The repo ships a pre-woven example vault in `ejemplo/`, with two readings, four

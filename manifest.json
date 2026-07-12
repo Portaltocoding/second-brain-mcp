@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "second-brain-mcp",
   "display_name": "Second Brain",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Tu segundo cerebro en ficheros Markdown: capturas lo que lees, lo conviertes en ideas tuyas y se conectan en un grafo que piensa contigo. En castellano.",
   "long_description": "Servidor MCP que convierte una carpeta de Markdown (tu vault de Obsidian, si lo usas) en un second brain de verdad: lecturas, notas permanentes, conceptos como nodos reales, resurfacing de ideas relacionadas y salud del grafo. Todo en ficheros tuyos, sin bases de datos ni nube.",
   "author": {

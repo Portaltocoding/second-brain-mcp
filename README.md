@@ -125,6 +125,16 @@ Es idempotente: sobre un vault que ya existe no toca nada.
 | `BRAIN_MODO` | Motor de `resurgir`: `lexico` o `rag` | `lexico` |
 | `BRAIN_RAG_UMBRAL` | A partir de cuántas notas puede sugerirse el modo rag | `50` |
 
+## Tu primera sesión
+
+No te la tienes que inventar: dile a tu asistente «hazme el onboarding de mi
+second brain» (es el prompt `empezar`; en Claude Code aparece como el comando
+`/mcp__second-brain__empezar`) y él te guía paso a paso: mira cómo está tu
+vault, planta contigo la primera lectura y la primera idea con tus propias
+palabras, te enseña qué devuelve `resurgir` con tu material, y te deja la
+chuleta de los tres gestos del día a día. Si el vault ya tiene contenido no te
+trata de nuevo: te hace un tour de lo que hay.
+
 ## Pruébalo en 30 segundos
 
 El repo trae un vault de ejemplo ya tejido en `ejemplo/`, con dos lecturas,

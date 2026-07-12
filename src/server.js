@@ -34,6 +34,7 @@ Tres carpetas, un grafo:
 
 Pídele a tu asistente:
 
+- «hazme el onboarding de mi second brain»: primera sesión guiada (prompt empezar).
 - «estoy leyendo X, apunta esto»: captura sin salir de lo que hacías.
 - «¿qué sé yo sobre X?»: resurgir trae las notas conectadas.
 - «¿cómo está el jardín?»: huérfanas, enlaces rotos y duplicados, para podar.
@@ -49,7 +50,7 @@ if (!vault) {
   process.exit(1);
 }
 
-const server = new McpServer({ name: 'second-brain', version: '0.1.0' });
+const server = new McpServer({ name: 'second-brain', version: '0.1.2' });
 
 // JSON compacto a propósito: la indentación solo infla la respuesta que el cliente
 // paga en tokens de contexto.
@@ -164,6 +165,51 @@ PROCEDIMIENTO:
 4. TEJE: crea con las tools (nota_permanente devuelve sugerencias de conexión). DECISIÓN: propónme las sugerencias fuertes; solo enlazas (nota_enlazar, con motivo de una frase) las que yo confirme.
 
 5. CIERRA en 2-3 líneas: qué entró, con qué conceptos, qué conexiones quedaron hechas o pendientes, y el enlace abrir de lo creado.`,
+      },
+    }],
+  }),
+);
+
+// ── Prompt de onboarding: la primera sesión, guiada ──────────────────────────
+// El momento más frágil es el vault vacío: el usuario no sabe qué pedir. Este
+// prompt es esa primera conversación escrita: mirar el estado, plantar la
+// primera lectura y la primera idea, y enseñar los tres gestos del día a día.
+server.registerPrompt(
+  'empezar',
+  {
+    description:
+      'Onboarding guiado del second brain: mira el estado del vault, planta la primera lectura y la primera idea con el usuario, enseña resurgir con su propio material y deja los tres gestos del día a día. Vale también para un vault con contenido: entonces es un tour.',
+    argsSchema: {
+      contexto: z.string().optional().describe('opcional: qué está leyendo o pensando el usuario ahora mismo, si ya se sabe'),
+    },
+  },
+  ({ contexto }) => ({
+    messages: [{
+      role: 'user',
+      content: {
+        type: 'text',
+        text: `Vas a hacerme el onboarding de mi second brain (MCP second-brain). Es una conversación, no un formulario: un paso cada vez, corto, y los marcados DECISIÓN son míos.
+
+${contexto ? `CONTEXTO QUE YA SABES: ${contexto}\n` : ''}
+PROCEDIMIENTO:
+
+1. MIRA EL ESTADO con jardin. Si el vault ya tiene notas, esto no es un onboarding sino un tour: enséñame en 3 líneas qué hay (cuántas lecturas, ideas y conceptos, y si el jardín pide poda), haz un resurgir con algo de mi propio contenido para que vea la magia, y salta al paso 5.
+
+2. LA PRIMERA SEMILLA. Pregúntame UNA cosa: qué estoy leyendo ahora, o qué idea me ha rondado la cabeza esta semana. DECISIÓN: espera mi respuesta, no inventes contenido de ejemplo.
+   - Si es algo que leo → lectura_crear con 1-2 temas, y pídeme un apunte concreto para lectura_nota.
+   - Si es una idea mía → salta directo al paso 3 con ella.
+
+3. LA PRIMERA IDEA PERMANENTE. De lo que te conté, propón UNA idea destilada en mis palabras, con el título como afirmación (no «Sobre los hábitos» sino «El entorno decide por ti») y 1-2 conceptos. DECISIÓN: yo apruebo o corrijo el título antes de nota_permanente.
+
+4. LA MAGIA. Haz un resurgir con una pregunta relacionada con lo que acabo de plantar, y enséñame qué vuelve. Con una sola nota volverá poco: dilo con honestidad («esto con 30 notas es otra cosa») en vez de fingir.
+
+5. LOS TRES GESTOS. Cierra dejándome esto, tal cual, como chuleta:
+   - «estoy leyendo X, apunta esto» → captura sin salir de lo que hacías
+   - «añade esto a mi second brain» (directo o lo más importante) → ingesta
+   - «¿qué sé yo sobre X?» → resurgir
+   Y uno semanal: «¿cómo está el jardín?» → poda.
+
+REGLAS: mensajes cortos, un paso por turno, nada de crear contenido que yo no haya dicho, y ningún enlace entre notas sin mi confirmación.`,
       },
     }],
   }),

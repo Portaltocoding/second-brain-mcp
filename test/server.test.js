@@ -132,7 +132,7 @@ test('el prompt ingerir existe y devuelve el procedimiento con el texto y el mod
   await client.connect(transport);
   try {
     const { prompts } = await client.listPrompts();
-    assert.deepEqual(prompts.map((p) => p.name), ['ingerir']);
+    assert.deepEqual(prompts.map((p) => p.name).sort(), ['empezar', 'ingerir']);
 
     const r = await client.getPrompt({
       name: 'ingerir',
@@ -148,6 +148,15 @@ test('el prompt ingerir existe y devuelve el procedimiento con el texto y el mod
     const auto = await client.getPrompt({ name: 'ingerir', arguments: { texto: 'algo' } });
     assert.match(auto.messages[0].content.text, /MODO: auto/);
     assert.match(auto.messages[0].content.text, /FUENTE: ninguna declarada/);
+
+    // el onboarding: guiado, con decisiones del usuario marcadas y los tres gestos
+    const onboarding = await client.getPrompt({ name: 'empezar', arguments: { contexto: 'está leyendo Deep Work' } });
+    const guia = onboarding.messages[0].content.text;
+    assert.match(guia, /CONTEXTO QUE YA SABES: está leyendo Deep Work/);
+    assert.match(guia, /DECISIÓN/);
+    assert.match(guia, /jardin/);
+    const sinContexto = await client.getPrompt({ name: 'empezar', arguments: {} });
+    assert.doesNotMatch(sinContexto.messages[0].content.text, /CONTEXTO QUE YA SABES/);
   } finally {
     await client.close();
   }
