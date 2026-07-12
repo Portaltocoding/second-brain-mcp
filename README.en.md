@@ -116,6 +116,50 @@ It is idempotent: on an existing vault it changes nothing.
 | `BRAIN_MODO` | `resurgir` engine: `lexico` or `rag` | `lexico` |
 | `BRAIN_RAG_UMBRAL` | Note count from which rag mode may be suggested | `50` |
 
+## Try it in 30 seconds
+
+The repo ships a pre-woven example vault in `ejemplo/`, with two readings, four
+ideas and four concepts all connected, so you can watch the graph work before
+writing a single note of your own:
+
+```bash
+git clone https://github.com/Portaltocoding/second-brain-mcp
+cd second-brain-mcp && npm install
+claude mcp add second-brain --env BRAIN_VAULT=$PWD/ejemplo -- node src/server.js
+```
+
+Then ask your assistant something like "what do I know about willpower?". You
+can also open the `ejemplo/` folder as a vault in Obsidian and see the graph
+drawn out.
+
+## A real session
+
+This is what daily use looks like, without learning a single tool:
+
+> **You:** add the key points of this to my second brain: *"for weeks now I've
+> noticed that if I leave my phone in another room in the morning I get two
+> hours of uninterrupted work, and if it sits next to me I work in ten-minute
+> bursts between glances"*
+>
+> **Assistant:** this is your own digested thought, so it goes in as a
+> permanent note in distill mode. The strong idea I see: **"Physical distance
+> to the phone sets the depth of the work"**, with the concepts `Foco` and
+> `Entorno`, which already exist in your graph. Create it like that?
+>
+> **You:** go
+>
+> **Assistant:** created. And it resonates strongly with **"El foco se diseña,
+> no se invoca"** (score 8): both are about preparing the environment instead
+> of trusting willpower. Link them with that reason?
+>
+> **You:** yes
+>
+> **Assistant:** linked, reason written into both notes. Here is the link to
+> open it in Obsidian: `obsidian://open?vault=...`
+
+Notice the order: the assistant proposes, you decide, and every connection
+keeps its written reason. That is the whole system.
+
 ## The three folders
 
 ```

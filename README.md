@@ -111,6 +111,50 @@ Es idempotente: sobre un vault que ya existe no toca nada.
 | `BRAIN_MODO` | Motor de `resurgir`: `lexico` o `rag` | `lexico` |
 | `BRAIN_RAG_UMBRAL` | A partir de cuántas notas puede sugerirse el modo rag | `50` |
 
+## Pruébalo en 30 segundos
+
+El repo trae un vault de ejemplo ya tejido en `ejemplo/`, con dos lecturas,
+cuatro ideas y cuatro conceptos conectados entre sí, así que puedes ver el
+grafo funcionando antes de haber escrito una sola nota tuya:
+
+```bash
+git clone https://github.com/Portaltocoding/second-brain-mcp
+cd second-brain-mcp && npm install
+claude mcp add second-brain --env BRAIN_VAULT=$PWD/ejemplo -- node src/server.js
+```
+
+Y le preguntas a tu asistente algo como «¿qué sé yo sobre la fuerza de
+voluntad?». También puedes abrir la carpeta `ejemplo/` como vault en Obsidian
+y ver el grafo dibujado.
+
+## Una sesión de verdad
+
+Así se ve el día a día, sin aprenderse ninguna tool:
+
+> **Tú:** añade esto a mi second brain, lo más importante: *"llevo semanas
+> notando que si dejo el móvil en otra habitación por la mañana me salen dos
+> horas de trabajo del tirón, y si lo tengo al lado voy a rachas de diez
+> minutos entre miradas"*
+>
+> **Asistente:** esto es un pensamiento tuyo ya digerido, así que va como nota
+> permanente en modo destilar. La idea fuerte que veo: **«La distancia física
+> al móvil marca la profundidad del trabajo»**, con los conceptos `Foco` y
+> `Entorno`, que ya existen en tu grafo. ¿La creo así?
+>
+> **Tú:** dale
+>
+> **Asistente:** creada. Y resuena fuerte con **«El foco se diseña, no se
+> invoca»** (score 8): las dos hablan de preparar el entorno en vez de confiar
+> en la voluntad. ¿Las enlazo con ese motivo?
+>
+> **Tú:** sí
+>
+> **Asistente:** enlazadas, motivo escrito en las dos. Te dejo el enlace para
+> abrirla en Obsidian: `obsidian://open?vault=...`
+
+Fíjate en el orden: el asistente propone, tú decides, y cada conexión queda
+con su porqué escrito. Eso es todo el sistema.
+
 ## Las tres carpetas
 
 ```
