@@ -199,12 +199,16 @@ registrarPromptDual(
       role: 'user',
       content: {
         type: 'text',
-        text: `Vas a hacerme el onboarding de mi second brain (MCP second-brain). Responde siempre en el idioma en el que yo te hable. Es una conversación, no un formulario: un paso cada vez, corto, y los marcados DECISIÓN son míos.
+        text: `Vas a hacerme el onboarding de mi second brain (MCP second-brain). Es una conversación, no un formulario: un paso cada vez, corto, y los marcados DECISIÓN son míos.
 
 ${contexto ? `CONTEXTO QUE YA SABES: ${contexto}\n` : ''}
 PROCEDIMIENTO:
 
-1. EXPLÍCAME QUÉ ES, en 4-5 líneas amables y sin jerga: una carpeta de notas normales donde lo que leo se convierte en ideas mías, y las ideas se conectan solas cuando las necesito. Acompáñalo de este diagrama, tal cual (traduce las etiquetas si te hablo en otro idioma):
+1. EL IDIOMA. Tu primer mensaje es solo esto: pregúntame en qué idioma quiero el onboarding, español o inglés (ES / EN), en una línea bilingüe. DECISIÓN: espera mi elección y todo lo que sigue va en ese idioma, incluidas las etiquetas del diagrama.
+
+2. QUÉ ES UN SECOND BRAIN, en 3-4 líneas amables y sin jerga: una carpeta de notas normales, tuya y en tu disco, donde lo que lees y aprendes se convierte en ideas escritas con tus palabras, para que la memoria la ponga el sistema y el criterio lo pongas tú.
+
+3. CÓMO FUNCIONA, con este diagrama tal cual (etiquetas en mi idioma) y 2-3 líneas: las ideas se conectan a conceptos, y cuando meses después trabajes en algo, las relacionadas vuelven solas.
 
 \`\`\`
    lo que lees          lo que piensas          lo que conecta
@@ -217,18 +221,18 @@ PROCEDIMIENTO:
                      (las ideas vuelven solas: resurgir)
 \`\`\`
 
-2. MIRA EL ESTADO con jardin. Si el vault ya tiene notas, esto no es un onboarding sino un tour: enséñame en 3 líneas qué hay (cuántas lecturas, ideas y conceptos, y si el jardín pide poda), haz un resurgir con algo de mi propio contenido para que vea la magia, y salta al paso 6.
+4. MIRA EL ESTADO con jardin. Si el vault ya tiene notas, esto no es un onboarding sino un tour: enséñame en 3 líneas qué hay (cuántas lecturas, ideas y conceptos, y si el jardín pide poda), haz un resurgir con algo de mi propio contenido para que vea la magia, y salta al paso 8.
 
-3. LA PRIMERA SEMILLA. Pregúntame UNA cosa con tres puertas, y que elija la mía: ¿qué estás leyendo ahora?, ¿qué idea te ha rondado la cabeza esta semana?, ¿o hay un territorio que quieras conquistar: un tema que estás estudiando o que necesitas dominar para el trabajo, un examen, un proyecto? DECISIÓN: espera mi respuesta, no inventes contenido de ejemplo.
-   - Si es algo que leo → lectura_crear con 1-2 temas, y pídeme un apunte concreto para lectura_nota.
-   - Si es una idea mía → salta directo al paso 4 con ella.
-   - Si es un territorio → planta la bandera: concepto_crear con ese tema, y pregúntame cuál es mi primera fuente (un libro, un curso, un artículo → lectura_crear con ese concepto como tema) o qué es lo que ya sé o creo sobre él (→ paso 4, con el territorio entre sus conceptos). A partir de ahí cada cosa que ingiera sobre el tema se cuelga sola de esa bandera, y ver crecer el nodo es ver el territorio conquistado.
+5. LA PRIMERA SEMILLA. Si el jardín está vacío, dímelo así de claro («tu jardín está vacío y toca plantar la primera semilla») y ábreme tres puertas para que elija la mía. DECISIÓN: espera mi respuesta, no inventes contenido de ejemplo.
+   1. ¿Qué estás leyendo ahora? Un libro, un artículo, un vídeo que te esté dejando apuntes. → lectura_crear con 1-2 temas, y pídeme un apunte concreto para lectura_nota.
+   2. ¿Qué idea te ha rondado la cabeza esta semana? Algo tuyo, ya masticado, que merezca quedarse. → salta directo al paso 6 con ella.
+   3. ¿Qué tema quieres dominar? Algo que estás estudiando o que necesitas para el trabajo, un examen, un proyecto. → planta la bandera: concepto_crear con ese tema, y pregúntame cuál es mi primera fuente (libro, curso, artículo → lectura_crear con ese concepto como tema) o qué sé o creo ya sobre él (→ paso 6, con ese concepto entre sus temas). Todo lo que ingiera después sobre el tema se cuelga solo de esa bandera, y ver crecer el nodo es ver el dominio ganado.
 
-4. LA PRIMERA IDEA PERMANENTE. De lo que te conté, propón UNA idea destilada en mis palabras, con el título como afirmación (no «Sobre los hábitos» sino «El entorno decide por ti») y 1-2 conceptos. DECISIÓN: yo apruebo o corrijo el título antes de nota_permanente.
+6. LA PRIMERA IDEA PERMANENTE. De lo que te conté, propón UNA idea destilada en mis palabras, con el título como afirmación (no «Sobre los hábitos» sino «El entorno decide por ti») y 1-2 conceptos. DECISIÓN: yo apruebo o corrijo el título antes de nota_permanente.
 
-5. LA MAGIA. Haz un resurgir con una pregunta relacionada con lo que acabo de plantar, y enséñame qué vuelve. Con una sola nota volverá poco: dilo con honestidad («esto con 30 notas es otra cosa») en vez de fingir.
+7. LA MAGIA. Haz un resurgir con una pregunta relacionada con lo que acabo de plantar, y enséñame qué vuelve. Con una sola nota volverá poco: dilo con honestidad («esto con 30 notas es otra cosa») en vez de fingir.
 
-6. LOS TRES GESTOS. Cierra dejándome esto, tal cual, como chuleta:
+8. LOS TRES GESTOS. Cierra dejándome esto, tal cual, como chuleta:
    - «estoy leyendo X, apunta esto» → captura sin salir de lo que hacías
    - «añade esto a mi second brain» (directo o lo más importante) → ingesta
    - «¿qué sé yo sobre X?» → resurgir
