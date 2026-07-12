@@ -239,6 +239,24 @@ vault://concepto/{nombre}
 El patrón que funciona: buscar barato (`vault_buscar`, `resurgir`), leer entero
 solo lo que interesa (el resource).
 
+## ¿Y si no uso Claude?
+
+Funciona igual, porque esto es MCP estándar y el protocolo ya lo habla casi
+todo el mundo. La escalera completa, de más cómodo a más independiente:
+
+1. **Claude Desktop**: la vía del doble clic con el `.mcpb`. La única sin tocar
+   nada.
+2. **Cualquier otro cliente MCP** (ChatGPT de escritorio, Cursor, VS Code,
+   Windsurf, Zed, Gemini CLI...): usa el bloque de configuración JSON de arriba,
+   que es el mismo para todos.
+3. **Sin cuenta de nada y sin internet**: LM Studio soporta MCP con modelos
+   locales, así que tu second brain puede hablar con un modelo que corre en tu
+   propio ordenador y tus notas no salen de tu disco jamás.
+4. **Sin ninguna IA**: el vault son ficheros Markdown normales con wikilinks
+   normales. Con Obsidian a secas ya tienes un second brain manual perfectamente
+   usable; el servidor es el copiloto que captura, destila y te trae las ideas
+   de vuelta, pero tus notas nunca son rehenes de nadie.
+
 ## Cómo se lleva con Obsidian
 
 Es su casa. Todo es Markdown plano con wikilinks nativos: graph view, backlinks
