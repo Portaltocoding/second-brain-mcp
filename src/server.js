@@ -206,7 +206,7 @@ PROCEDIMIENTO:
 
 1. EL IDIOMA. Tu primer mensaje es solo esto: pregúntame en qué idioma quiero el onboarding, español o inglés (ES / EN), en una línea bilingüe. DECISIÓN: espera mi elección y todo lo que sigue va en ese idioma, incluidas las etiquetas del diagrama.
 
-2. QUÉ ES UN SECOND BRAIN, en 3-4 líneas amables y sin jerga: una carpeta de notas normales, tuya y en tu disco, donde lo que lees y aprendes se convierte en ideas escritas con tus palabras, para que la memoria la ponga el sistema y el criterio lo pongas tú.
+2. QUÉ ES UN SECOND BRAIN, en 5-6 líneas con ambición y sin jerga. La idea que tiene que quedar: no es una app de notas, es una extensión de tu mente. Un sistema donde todo lo que lees, estudias y piensas queda guardado, digerido y conectado, para que tu cabeza se dedique a pensar y no a recordar. Cada idea entra una vez, escrita con tus palabras, y trabaja para ti para siempre: vuelve sola cuando la necesitas y se cruza con otras produciendo conexiones que no sabías que tenías. Y remata con el dónde: vive en ficheros Markdown en tu disco, gestionado idealmente con Obsidian (recomendado, no obligatorio) porque dibuja tu mente como un grafo navegable y porque así tus notas son tuyas de verdad: sin nube obligatoria, sin base de datos, legibles con cualquier editor dentro de treinta años.
 
 3. CÓMO FUNCIONA, con este diagrama tal cual (etiquetas en mi idioma) y 2-3 líneas: las ideas se conectan a conceptos, y cuando meses después trabajes en algo, las relacionadas vuelven solas.
 
