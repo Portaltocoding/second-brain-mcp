@@ -4,23 +4,21 @@
 // resurfacing (resurgir), salud del grafo (jardin) y mini-brains por proyecto.
 //
 // Configuración: la raíz del vault llega por la variable de entorno BRAIN_VAULT
-// o como primer argumento de línea de comandos. Sin ella, el servidor no arranca.
+// o como primer argumento de línea de comandos. Sin ninguna de las dos, arranca
+// igual sobre un vault por defecto en ~/second-brain.
 import { mkdir, readdir, readFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { homedir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { registro } from './registro.js';
 import { crearSiNoExiste, nombreArchivoSeguro } from './store.js';
 
-// `--init /ruta`: andamiaje del vault — las tres carpetas y una portada. Idempotente:
-// sobre un vault que ya existe no toca nada (Inicio.md solo se crea si no está).
-if (process.argv[2] === '--init') {
-  const destino = process.argv[3] || process.env.BRAIN_VAULT;
-  if (!destino) {
-    console.error('uso: second-brain-mcp --init /ruta/al/vault');
-    process.exit(1);
-  }
+// Andamiaje del vault — las tres carpetas y una portada. Idempotente: sobre un
+// vault que ya existe no toca nada (Inicio.md solo se crea si no está). Lo usan
+// tanto `--init` como el arranque con vault por defecto.
+async function andamiar(destino) {
   for (const d of ['40-Lecturas', '50-Notas', '60-Conceptos']) {
     await mkdir(join(destino, d), { recursive: true });
   }
@@ -39,15 +37,63 @@ Pídele a tu asistente:
 - «¿qué sé yo sobre X?»: resurgir trae las notas conectadas.
 - «¿cómo está el jardín?»: huérfanas, enlaces rotos y duplicados, para podar.
 `;
-  const creada = await crearSiNoExiste(join(destino, 'Inicio.md'), portada);
+  return crearSiNoExiste(join(destino, 'Inicio.md'), portada);
+}
+
+if (process.argv[2] === '--init') {
+  const destino = process.argv[3] || process.env.BRAIN_VAULT;
+  if (!destino) {
+    console.error('uso: second-brain-mcp --init /ruta/al/vault');
+    process.exit(1);
+  }
+  const creada = await andamiar(destino);
   console.error(`second-brain-mcp: vault listo en ${destino}${creada ? '' : ' (Inicio.md ya existía, no se toca)'}`);
   process.exit(0);
 }
 
-const vault = process.env.BRAIN_VAULT || process.argv[2];
-if (!vault) {
-  console.error('second-brain-mcp: define BRAIN_VAULT (o pasa la ruta del vault como argumento).');
-  process.exit(1);
+// ── Resolución del vault ─────────────────────────────────────────────────────
+// Dos reglas, las dos aprendidas de ver el producto fallar en los primeros
+// sesenta segundos:
+//
+// 1. SIN CONFIGURAR NO SE MUERE. Antes, sin BRAIN_VAULT el proceso salía con
+//    código 1 y el cliente MCP lo pintaba como «server failed to start»: el
+//    mensaje que explicaba qué faltaba iba a stderr, donde nadie mira. Ahora hay
+//    vault por defecto en ~/second-brain, andamiado al arrancar, y el producto
+//    funciona sin que el usuario configure absolutamente nada.
+//
+// 2. CON LA RUTA MAL ESCRITA NO SE ESCRIBE A CIEGAS. Al revés del anterior, este
+//    fallo era silencioso: una ruta con un typo arrancaba igual y plantaba un
+//    vault entero en una carpeta fantasma, mientras el usuario creía estar
+//    escribiendo en su Obsidian. La heurística es la intención: si el directorio
+//    PADRE existe, crear el vault es lo que el usuario quería; si no existe ni el
+//    padre, es un error de escritura. En ese caso el servidor arranca igual —para
+//    que el aviso se vea en el chat y no en un log— pero toda tool responde
+//    explicando qué ruta se pidió y qué hacer.
+const VAULT_POR_DEFECTO = join(homedir(), 'second-brain');
+const rutaPedida = process.env.BRAIN_VAULT || process.argv[2];
+const vault = rutaPedida || VAULT_POR_DEFECTO;
+
+let vaultInvalido = null;
+if (rutaPedida) {
+  if (!(await existe(rutaPedida)) && !(await existe(dirname(rutaPedida)))) {
+    vaultInvalido = `la ruta configurada no existe y su carpeta contenedora tampoco: "${rutaPedida}". `
+      + 'Parece un error al escribirla. Revisa BRAIN_VAULT en la configuración de tu cliente MCP '
+      + '(la ruta debe ser absoluta), o quítala del todo para usar el vault por defecto '
+      + `en ${VAULT_POR_DEFECTO}.`;
+    console.error(`second-brain-mcp: ${vaultInvalido}`);
+  }
+} else {
+  await andamiar(vault);
+  console.error(`second-brain-mcp: sin BRAIN_VAULT configurado, uso el vault por defecto en ${vault}`);
+}
+
+async function existe(ruta) {
+  try {
+    await readdir(ruta);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 const server = new McpServer({ name: 'second-brain', version: '0.1.2' });
@@ -67,6 +113,9 @@ for (const [nombre, def] of Object.entries(registro)) {
     nombre,
     { description: def.description, inputSchema: def.schema, annotations: def.annotations },
     async (args) => {
+      // El aviso de ruta mal configurada viaja como error de tool, no como muerte
+      // del proceso: así el usuario lo lee en su conversación y puede arreglarlo.
+      if (vaultInvalido) return contenidoError(new Error(vaultInvalido));
       try {
         return contenidoOk(await def.ejecutar(vault, args));
       } catch (e) {

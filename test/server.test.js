@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp } from 'node:fs/promises';
+import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -54,18 +54,63 @@ test('second-brain expone las 13 tools del grafo y funciona extremo a extremo', 
   }
 });
 
-test('el servidor exige BRAIN_VAULT (o el vault como argumento) para arrancar', async () => {
-  const { spawn } = await import('node:child_process');
-  const env = { ...process.env };
+test('sin BRAIN_VAULT el servidor NO se muere: andamia el vault por defecto en ~/second-brain', async () => {
+  // Antes salía con código 1 y el cliente MCP lo pintaba como «failed to start».
+  // Ahora el producto funciona sin configurar nada.
+  const casa = await mkdtemp(join(tmpdir(), 'second-brain-home-'));
+  const env = { ...process.env, HOME: casa, USERPROFILE: casa };
   delete env.BRAIN_VAULT;
-  const salida = await new Promise((resolve) => {
-    const p = spawn(process.execPath, [SERVER], { env });
-    let err = '';
-    p.stderr.on('data', (d) => { err += d; });
-    p.on('exit', (code) => resolve({ code, err }));
+
+  const transport = new StdioClientTransport({ command: process.execPath, args: [SERVER], env });
+  const client = new Client({ name: 'test', version: '0' });
+  await client.connect(transport);
+  const r = await client.callTool({ name: 'nota_permanente', arguments: { titulo: 'Primera sin configurar', contenido: 'funciona a la primera' } });
+  await client.close();
+
+  assert.equal(r.isError, undefined, 'la escritura debe funcionar sin configuración alguna');
+  const escrita = join(casa, 'second-brain', '50-Notas', 'Primera sin configurar.md');
+  assert.match(await readFile(escrita, 'utf8'), /funciona a la primera/);
+  // y el andamiaje queda listo para abrirlo con Obsidian
+  assert.match(await readFile(join(casa, 'second-brain', 'Inicio.md'), 'utf8'), /Segundo cerebro/);
+});
+
+test('una ruta mal escrita no se escribe a ciegas: el aviso llega al chat, no a un log', async () => {
+  // El fallo silencioso: antes arrancaba y plantaba el vault en una carpeta
+  // fantasma mientras el usuario creía escribir en su Obsidian.
+  const casa = await mkdtemp(join(tmpdir(), 'second-brain-typo-'));
+  const typo = join(casa, 'Obsidiam', 'Bault'); // ni la carpeta ni su padre existen
+
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [SERVER],
+    env: { ...process.env, HOME: casa, USERPROFILE: casa, BRAIN_VAULT: typo },
   });
-  assert.equal(salida.code, 1);
-  assert.match(salida.err, /BRAIN_VAULT/);
+  const client = new Client({ name: 'test', version: '0' });
+  await client.connect(transport); // arranca igual: el aviso tiene que verse en el chat
+  const r = await client.callTool({ name: 'nota_permanente', arguments: { titulo: 'No debe existir', contenido: 'x' } });
+  await client.close();
+
+  assert.equal(r.isError, true);
+  assert.match(r.content[0].text, /no existe y su carpeta contenedora tampoco/);
+  await assert.rejects(() => readFile(join(typo, '50-Notas', 'No debe existir.md'), 'utf8'), /ENOENT/);
+});
+
+test('una ruta nueva cuyo padre SÍ existe se crea sin rechistar: es lo que el usuario quería', async () => {
+  const casa = await mkdtemp(join(tmpdir(), 'second-brain-nuevo-'));
+  const destino = join(casa, 'cerebro'); // casa existe, cerebro no
+
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [SERVER],
+    env: { ...process.env, HOME: casa, USERPROFILE: casa, BRAIN_VAULT: destino },
+  });
+  const client = new Client({ name: 'test', version: '0' });
+  await client.connect(transport);
+  const r = await client.callTool({ name: 'nota_permanente', arguments: { titulo: 'Idea', contenido: 'contenido' } });
+  await client.close();
+
+  assert.equal(r.isError, undefined);
+  assert.match(await readFile(join(destino, '50-Notas', 'Idea.md'), 'utf8'), /contenido/);
 });
 
 test('resources: las notas se listan y se leen como Markdown completo', async () => {
