@@ -2,8 +2,36 @@
 
 ## v0.1.3 (2026-08-26)
 
-Instalar y empezar deja de tener letra pequeña, y dos correcciones de fondo en el
-motor de búsqueda.
+Instalar y empezar deja de tener letra pequeña, el servidor aprende a
+presentarse, y dos correcciones de fondo en el motor de búsqueda.
+
+### El servidor se presenta
+
+- **`instructions` en el handshake MCP.** Hasta ahora el asistente recibía quince
+  tools sueltas y ninguna idea de que formaban un sistema: todo dependía de que el
+  usuario supiera pedir cada cosa por su nombre, y el onboarding guiado —los cinco
+  minutos que convierten una instalación en un second brain plantado— no lo
+  descubría nadie. Ahora el servidor le cuenta al modelo qué es esto, dónde vive el
+  vault, los cuatro gestos del día a día y las reglas que evitan destrozos (no
+  inventar contenido, no enlazar sin permiso, conceptos escasos, títulos que
+  afirman).
+- **`resurgir` por iniciativa propia.** El README prometía que las notas
+  relacionadas aparecen solas, y no aparecían nunca: solo salían si el usuario
+  preguntaba. Las instrucciones mandan ahora traer de vuelta lo que ya pensó, con
+  su enlace, cuando la conversación toca un tema sobre el que pueda haber escrito.
+- **Las tools de lectura se describen por cuándo usarlas**, no por lo que hacen por
+  dentro. Al modelo no le sirve «appendea una línea a ## Notas».
+
+### Distribución
+
+- **La ficha del registro MCP deja de pedir `BRAIN_VAULT` como obligatorio** y
+  cambia el listado de funciones por lo que uno se lleva. Es la boca del embudo:
+  el 100% del tráfico entra por ahí, y decía que hacía falta configurar una
+  variable justo en la versión en que ya no hace falta.
+- **Un camino de vuelta.** 380 descargas y cero stars, cero issues. No hay
+  analítica ni la va a haber —las notas no salen del disco de nadie—, así que la
+  portada del vault y el final del onboarding dicen de dónde salió esto, en una
+  línea y sin insistir.
 
 ### Los primeros sesenta segundos
 
