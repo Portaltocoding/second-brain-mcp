@@ -213,3 +213,25 @@ test('el prompt ingerir existe y devuelve el procedimiento con el texto y el mod
     await client.close();
   }
 });
+
+test('el cliente recibe instructions: el asistente sabe qué es esto sin que le nombren una tool', async () => {
+  // Sin esto el modelo ve quince tools sueltas y el onboarding no lo descubre nadie.
+  const vault = await mkdtemp(join(tmpdir(), 'second-brain-instr-'));
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [SERVER],
+    env: { ...process.env, BRAIN_VAULT: vault },
+  });
+  const client = new Client({ name: 'test', version: '0.0.1' });
+  await client.connect(transport);
+  try {
+    const instrucciones = client.getInstructions();
+    assert.ok(instrucciones, 'el servidor debe declarar instructions');
+    assert.ok(instrucciones.includes(vault), 'las instrucciones dicen dónde vive el vault');
+    // lo que convierte una instalación en un second brain vivo
+    assert.match(instrucciones, /empezar/, 'ofrecen el onboarding sobre vault vacío');
+    assert.match(instrucciones, /INICIATIVA PROPIA/, 'mandan usar resurgir sin que se lo pidan');
+  } finally {
+    await client.close();
+  }
+});

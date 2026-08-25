@@ -96,7 +96,31 @@ async function existe(ruta) {
   }
 }
 
-const server = new McpServer({ name: 'second-brain', version: '0.1.3' });
+// ── Instrucciones del servidor ───────────────────────────────────────────────
+// Lo que el cliente MCP entrega al modelo al conectarse. Sin esto, el asistente
+// recibe quince tools sueltas y ninguna idea de que forman un sistema: el usuario
+// tiene que saber pedir cada cosa por su nombre, y el onboarding —que es lo que
+// convierte una instalación en un second brain vivo— no lo descubre nadie.
+// Va en castellano a propósito: lo lee el modelo, que responde en el idioma del
+// usuario. Corto porque ocupa contexto en cada sesión.
+const INSTRUCCIONES = `Este servidor es el second brain del usuario: lo que lee, piensa y estudia queda escrito en ficheros Markdown, conectado en un grafo, y vuelve solo cuando hace falta. Su vault está en ${vault}.
+
+Está disponible sin que el usuario nombre ninguna tool. Los gestos del día a día:
+- «estoy leyendo X, apunta esto» → lectura_crear (si no existe) + lectura_nota.
+- «añade esto a mi second brain» → prompt \`ingerir\`: clasifica, destila y teje.
+- «¿qué sé yo sobre X?» → resurgir.
+- Semanal: «¿cómo está el jardín?» → jardin.
+
+Y lo que de verdad justifica todo esto: usa resurgir POR INICIATIVA PROPIA, sin que te lo pidan, cuando la conversación toque un tema sobre el que el usuario pueda haber escrito. Si ya lo pensó, devuélveselo con su enlace en vez de improvisar una respuesta nueva. Un second brain que solo contesta cuando lo interrogan es un cajón.
+
+Si el vault está recién creado (jardin lo devuelve todo a cero), no le expliques las tools: ofrécele el onboarding guiado (prompt \`empezar\`), una conversación de cinco minutos que le deja el sistema plantado y los gestos aprendidos.
+
+Reglas que no se saltan: no crear contenido que el usuario no haya dicho; no enlazar dos notas sin su confirmación; conceptos escasos (2-4 por ingesta, reutilizando los que ya existen antes que inventar sinónimos); y los títulos de nota permanente son afirmaciones —«El entorno decide por ti»—, no temas —«Sobre los hábitos»—.`;
+
+const server = new McpServer(
+  { name: 'second-brain', version: '0.1.3' },
+  { instructions: INSTRUCCIONES },
+);
 
 // JSON compacto a propósito: la indentación solo infla la respuesta que el cliente
 // paga en tokens de contexto.
