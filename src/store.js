@@ -62,10 +62,15 @@ export async function leerNota(ruta) {
   return { data, content, cruda: texto };
 }
 
+// Contador de proceso: pid + reloj NO bastan para que el temporal sea único, porque
+// dos escrituras concurrentes al mismo fichero dentro del mismo milisegundo generan
+// el mismo nombre — la primera lo renombra y la segunda falla con ENOENT.
+let secuenciaTmp = 0;
+
 // Escritura atómica genérica: tmp en el mismo directorio (mismo filesystem) + rename.
 export async function escribirAtomica(ruta, contenido) {
   await mkdir(dirname(ruta), { recursive: true });
-  const tmp = `${ruta}.${process.pid}.${Date.now()}.tmp`;
+  const tmp = `${ruta}.${process.pid}.${Date.now()}.${secuenciaTmp++}.tmp`;
   try {
     await writeFile(tmp, contenido, 'utf8');
     await rename(tmp, ruta);

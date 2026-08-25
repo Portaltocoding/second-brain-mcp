@@ -204,16 +204,23 @@ ${contenido}
 // Añade "[[X]]" a una lista del frontmatter (p.ej. relacionadas: [...]) por regex,
 // porque actualizarCampoFrontmatter serializa escalares, no listas. Idempotente.
 async function agregarWikilinkALista(ruta, clave, destino) {
-  const cruda = await store.leerCruda(ruta);
-  const link = `[[${store.nombreArchivoSeguro(destino)}]]`;
-  const re = new RegExp(`^(${clave}:\\s*)\\[(.*)\\][ \\t]*$`, 'm');
-  const m = cruda.match(re);
-  if (!m) throw new Error(`${ruta}: no tiene una lista "${clave}" en el frontmatter`);
-  if (m[2].includes(link)) return false; // ya enlazadas
-  const dentro = m[2].trim();
-  const nuevaLista = dentro ? `${dentro}, "${link}"` : `"${link}"`;
-  await store.escribirAtomica(ruta, cruda.replace(re, `${clave}: [${nuevaLista}]`));
-  return true;
+  // Bajo conLock como sus hermanas de store.js: esto es leer-modificar-escribir y
+  // el asistente encadena varias nota_enlazar EN PARALELO (nota_permanente devuelve
+  // hasta dos sugerencias de conexión). Sin serializar, las dos leen el mismo
+  // frontmatter, la última pisa a la primera y la nota queda incoherente: la lista
+  // `relacionadas` con un enlace y ## Conexiones con dos motivos escritos.
+  return store.conLock(ruta, async () => {
+    const cruda = await store.leerCruda(ruta);
+    const link = `[[${store.nombreArchivoSeguro(destino)}]]`;
+    const re = new RegExp(`^(${clave}:\\s*)\\[(.*)\\][ \\t]*$`, 'm');
+    const m = cruda.match(re);
+    if (!m) throw new Error(`${ruta}: no tiene una lista "${clave}" en el frontmatter`);
+    if (m[2].includes(link)) return false; // ya enlazadas
+    const dentro = m[2].trim();
+    const nuevaLista = dentro ? `${dentro}, "${link}"` : `"${link}"`;
+    await store.escribirAtomica(ruta, cruda.replace(re, `${clave}: [${nuevaLista}]`));
+    return true;
+  });
 }
 
 // Enlaza dos notas permanentes entre sí (relacionadas ↔ relacionadas). Por defecto

@@ -4,6 +4,7 @@ import { mkdtemp, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import * as c from '../src/cerebro.js';
+import * as store from '../src/store.js';
 
 async function vaultVacio() {
   return mkdtemp(join(tmpdir(), 'vida-vault-cerebro-'));
@@ -410,4 +411,36 @@ test('las stopwords se filtran ya normalizadas (sin tilde) y no generan ruido', 
     const r = await c.resurgir(vault, { texto: ruido });
     assert.deepEqual(r.resultados, [], `"${ruido}" es stopword y no debe puntuar`);
   }
+});
+
+test('nota_enlazar en paralelo: ni pierde enlaces ni deja la nota incoherente', async () => {
+  const vault = await vaultVacio();
+  await c.notaPermanente(vault, { titulo: 'Ancla', contenido: 'la nota que recibe los enlaces' });
+  for (let i = 0; i < 4; i += 1) await c.notaPermanente(vault, { titulo: `Idea ${i}`, contenido: `cuerpo ${i}` });
+
+  // El caso real: nota_permanente devuelve hasta 2 sugerencias y el asistente
+  // encadena varias nota_enlazar a la vez sobre la MISMA nota.
+  const res = await Promise.allSettled(
+    [0, 1, 2, 3].map((i) => c.notaEnlazar(vault, { titulo: 'Ancla', con: `Idea ${i}`, motivo: `motivo ${i}` })),
+  );
+  assert.equal(res.filter((r) => r.status === 'rejected').length, 0, 'ninguna llamada debe fallar');
+
+  const texto = await readFile(join(vault, '50-Notas', 'Ancla.md'), 'utf8');
+  const frontmatter = texto.split('\n').find((l) => l.startsWith('relacionadas:'));
+  const enFrontmatter = (frontmatter.match(/\[\[Idea \d\]\]/g) || []).length;
+  const enConexiones = (texto.split('## Conexiones')[1] || '').trim().split('\n').filter(Boolean).length;
+  assert.equal(enFrontmatter, 4, 'los cuatro enlaces deben quedar en relacionadas');
+  assert.equal(enConexiones, 4, '## Conexiones debe decir lo mismo que el frontmatter');
+});
+
+test('escrituras atómicas concurrentes al mismo fichero no colisionan en el temporal', async () => {
+  const vault = await vaultVacio();
+  const ruta = join(vault, 'concurrente.md');
+  const res = await Promise.allSettled([
+    store.escribirAtomica(ruta, 'A'),
+    store.escribirAtomica(ruta, 'B'),
+    store.escribirAtomica(ruta, 'C'),
+  ]);
+  assert.equal(res.filter((r) => r.status === 'rejected').length, 0, 'el nombre del tmp lleva contador: nadie pisa a nadie');
+  assert.match(await readFile(ruta, 'utf8'), /^[ABC]$/);
 });
