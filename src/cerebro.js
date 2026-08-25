@@ -302,13 +302,34 @@ export async function vaultBuscar(vault, { query, tipo, limite = 20 } = {}) {
 
 // ── Esteroides del second brain ──────────────────────────────────────────────
 
-// Stopwords castellanas mínimas para tokenizar consultas de resurfacing.
+// Stopwords castellanas para tokenizar consultas de resurfacing. SIN TILDES a
+// propósito: el tokenizador normaliza antes de consultar este conjunto, así que
+// una entrada acentuada ("más") no casaría jamás con el token ya normalizado.
 const STOPWORDS = new Set([
+  // función, 4+ letras
   'para', 'como', 'este', 'esta', 'esto', 'estos', 'estas', 'sobre', 'entre', 'donde',
-  'cuando', 'porque', 'pero', 'más', 'menos', 'todo', 'toda', 'todos', 'todas', 'unas',
-  'unos', 'una', 'los', 'las', 'del', 'con', 'por', 'que', 'qué', 'hacia', 'desde',
+  'cuando', 'porque', 'pero', 'mas', 'menos', 'todo', 'toda', 'todos', 'todas', 'unas',
+  'unos', 'una', 'los', 'las', 'del', 'con', 'por', 'que', 'hacia', 'desde',
   'hasta', 'tiene', 'tienen', 'hacer', 'hace', 'cada', 'muy', 'sin', 'ser', 'estar',
+  // función, 2-3 letras: entran ahora que el umbral de longitud baja a 2. Filtra la
+  // lista, no la longitud — así "RAG", "LLM", "MCP" o "IA" dejan de ser invisibles.
+  'de', 'la', 'el', 'en', 'es', 'un', 'se', 'no', 'lo', 'al', 'su', 'me', 'te',
+  'ya', 'ha', 'si', 'mi', 'tu', 'le', 'ni', 'yo', 'sus', 'mis', 'tus', 'les',
+  'nos', 'son', 'fue', 'era', 'hay', 'asi', 'tan', 'ese', 'esa', 'eso', 'han',
 ]);
+
+// Longitud mínima de token. Un solo carácter no discrimina nada; a partir de dos
+// sí, y ahí viven las siglas técnicas (RAG, LLM, MCP, ML, IA, API, SQL, GPU).
+const MIN_TOKEN = 2;
+
+// Coincidencia ANCLADA AL INICIO DE PALABRA. Con tokens de 4+ letras bastaba un
+// `includes`, pero con siglas de dos el substring es veneno: "ia" casaría dentro
+// de "materia", "familia" o "experiencia". Anclamos el principio y dejamos libre
+// el final, que es lo que da el plural gratis ("habito" encuentra "habitos").
+// \b no sirve: la ñ no es carácter de palabra para JS y rompería el ancla.
+function reTermino(t) {
+  return new RegExp(`(?<![a-zñ0-9])${t}`, 'g');
+}
 
 function tokenizar(texto) {
   return [...new Set(
@@ -316,7 +337,7 @@ function tokenizar(texto) {
       .toLowerCase()
       .normalize('NFD').replace(/[̀-ͯ]/g, '') // sin tildes para casar mejor
       .split(/[^a-zñ0-9]+/)
-      .filter((w) => w.length >= 4 && !STOPWORDS.has(w)),
+      .filter((w) => w.length >= MIN_TOKEN && !STOPWORDS.has(w)),
   )];
 }
 
@@ -368,9 +389,9 @@ export async function resurgir(vault, { texto, limite = 3, excluir, modo } = {})
     const motivos = [];
     for (const t of terminos) {
       let s = 0;
-      if (tituloNorm.includes(t)) s += 3;
-      if (temasLinea.includes(t)) s += 2;
-      const enCuerpo = (cuerpoNorm.match(new RegExp(t, 'g')) || []).length;
+      if (reTermino(t).test(tituloNorm)) s += 3;
+      if (reTermino(t).test(temasLinea)) s += 2;
+      const enCuerpo = (cuerpoNorm.match(reTermino(t)) || []).length;
       s += Math.min(3, enCuerpo);
       if (s > 0) { score += s; motivos.push(t); }
     }

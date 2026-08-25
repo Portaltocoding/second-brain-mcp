@@ -6,12 +6,20 @@
 import { join, relative } from 'node:path';
 import * as store from './store.js';
 
+// Sin tildes a propósito: normalizar() se aplica ANTES de consultar el conjunto.
 const STOPWORDS = new Set([
   'para', 'como', 'este', 'esta', 'esto', 'estos', 'estas', 'sobre', 'entre', 'donde',
-  'cuando', 'porque', 'pero', 'más', 'menos', 'todo', 'toda', 'todos', 'todas', 'unas',
-  'unos', 'una', 'los', 'las', 'del', 'con', 'por', 'que', 'qué', 'hacia', 'desde',
+  'cuando', 'porque', 'pero', 'mas', 'menos', 'todo', 'toda', 'todos', 'todas', 'unas',
+  'unos', 'una', 'los', 'las', 'del', 'con', 'por', 'que', 'hacia', 'desde',
   'hasta', 'tiene', 'tienen', 'hacer', 'hace', 'cada', 'muy', 'sin', 'ser', 'estar',
+  'de', 'la', 'el', 'en', 'es', 'un', 'se', 'no', 'lo', 'al', 'su', 'me', 'te',
+  'ya', 'ha', 'si', 'mi', 'tu', 'le', 'ni', 'yo', 'sus', 'mis', 'tus', 'les',
+  'nos', 'son', 'fue', 'era', 'hay', 'asi', 'tan', 'ese', 'esa', 'eso', 'han',
 ]);
+
+// Igual que en el modo lexico: filtra la lista de stopwords, no la longitud, para
+// que las siglas técnicas de 2-3 letras (RAG, LLM, MCP, IA) sean indexables.
+const MIN_TOKEN = 2;
 
 // Stemming castellano MUY conservador: plurales y un puñado de sufijos frecuentes.
 // Preferimos quedarnos cortos a fusionar palabras distintas: un stem agresivo
@@ -47,7 +55,7 @@ function normalizar(texto) {
 export function tokenizarRag(texto) {
   return normalizar(texto)
     .split(/[^a-zñ0-9]+/)
-    .filter((w) => w.length >= 4 && !STOPWORDS.has(w))
+    .filter((w) => w.length >= MIN_TOKEN && !STOPWORDS.has(w))
     .map(stem);
 }
 

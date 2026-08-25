@@ -364,3 +364,50 @@ test('las creaciones devuelven el enlace obsidian:// para abrir la nota', async 
   const concepto = await c.conceptoCrear(vault, { nombre: 'Nodo' });
   assert.match(concepto.abrir, /file=60-Conceptos%2FNodo$/);
 });
+
+test('resurgir encuentra siglas de 2-3 letras (RAG, LLM) en título y en temas', async () => {
+  const vault = await vaultVacio();
+  await c.notaPermanente(vault, {
+    titulo: 'El RAG mejora con reranking',
+    contenido: 'Un pipeline RAG puro pierde precisión; el reranker recupera lo que el retriever ordena mal.',
+    temas: ['RAG', 'LLM'],
+  });
+
+  // el término está en el título y en el cuerpo
+  const rag = await c.resurgir(vault, { texto: 'RAG' });
+  assert.ok(rag.resultados.length >= 1, 'RAG debe encontrar la nota');
+  assert.equal(rag.resultados[0].titulo, 'El RAG mejora con reranking');
+
+  // LLM solo vive en temas: el peso ×2 del frontmatter tiene que bastar
+  const llm = await c.resurgir(vault, { texto: 'LLM' });
+  assert.ok(llm.resultados.some((r) => r.fichero === '50-Notas/El RAG mejora con reranking.md'));
+});
+
+test('resurgir ancla al inicio de palabra: una sigla no casa dentro de otra palabra', async () => {
+  const vault = await vaultVacio();
+  await c.notaPermanente(vault, {
+    titulo: 'La experiencia de la materia',
+    contenido: 'Hablo de familia, materia y experiencia: ni una sola sigla por aquí.',
+  });
+  // "ia" como substring aparece en materia/familia/experiencia; como PALABRA, no
+  const r = await c.resurgir(vault, { texto: 'IA' });
+  assert.deepEqual(r.resultados, [], 'IA no debe casar dentro de "materia" ni "experiencia"');
+});
+
+test('resurgir sigue casando plurales tras anclar el inicio de palabra', async () => {
+  const vault = await vaultVacio();
+  await c.notaPermanente(vault, { titulo: 'Los hábitos atómicos crean sistemas', contenido: 'Un hábito pequeño repetido vence a la fuerza de voluntad.' });
+  const singular = await c.resurgir(vault, { texto: 'hábito' });
+  const plural = await c.resurgir(vault, { texto: 'hábitos' });
+  assert.equal(singular.resultados[0]?.titulo, 'Los hábitos atómicos crean sistemas');
+  assert.equal(plural.resultados[0]?.titulo, 'Los hábitos atómicos crean sistemas');
+});
+
+test('las stopwords se filtran ya normalizadas (sin tilde) y no generan ruido', async () => {
+  const vault = await vaultVacio();
+  await c.notaPermanente(vault, { titulo: 'Una idea cualquiera', contenido: 'Texto con más palabras que las que hacen falta.' });
+  for (const ruido of ['la', 'es', 'más', 'qué']) {
+    const r = await c.resurgir(vault, { texto: ruido });
+    assert.deepEqual(r.resultados, [], `"${ruido}" es stopword y no debe puntuar`);
+  }
+});
