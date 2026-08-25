@@ -1,6 +1,6 @@
 {
   "name": "@toportal/second-brain-mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "mcpName": "io.github.Portaltocoding/second-brain-mcp",
   "description": "Servidor MCP para un second brain en Obsidian: lecturas, notas permanentes, conceptos como nodos reales, resurfacing y salud del grafo. En castellano.",
   "type": "module",

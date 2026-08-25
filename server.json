@@ -6,21 +6,21 @@
     "url": "https://github.com/Portaltocoding/second-brain-mcp",
     "source": "github"
   },
-  "version": "0.1.2",
+  "version": "0.1.3",
   "packages": [
     {
       "registryType": "npm",
       "registryBaseUrl": "https://registry.npmjs.org",
       "identifier": "@toportal/second-brain-mcp",
-      "version": "0.1.2",
+      "version": "0.1.3",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
           "name": "BRAIN_VAULT",
-          "description": "Ruta al vault de Obsidian (carpeta de Markdown)",
-          "isRequired": true,
+          "description": "Opcional. Ruta absoluta a tu vault de Obsidian (carpeta de Markdown). Sin ella se usa ~/second-brain, que se crea solo al arrancar.",
+          "isRequired": false,
           "format": "filepath"
         },
         {

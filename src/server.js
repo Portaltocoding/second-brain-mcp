@@ -96,7 +96,7 @@ async function existe(ruta) {
   }
 }
 
-const server = new McpServer({ name: 'second-brain', version: '0.1.2' });
+const server = new McpServer({ name: 'second-brain', version: '0.1.3' });
 
 // JSON compacto a propósito: la indentación solo infla la respuesta que el cliente
 // paga en tokens de contexto.
