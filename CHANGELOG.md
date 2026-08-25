@@ -47,6 +47,14 @@ presentarse, y dos correcciones de fondo en el motor de búsqueda.
   arranca —para que el aviso se vea en la conversación y no en un log— y toda
   tool responde explicando qué ruta se pidió y cómo arreglarlo. Si el padre sí
   existe, la carpeta se crea sin preguntar: eso es lo que el usuario quería.
+- **El enlace de Obsidian estaba roto justo en el camino nuevo.** Se construía como
+  `obsidian://open?vault=<nombre de la carpeta>&file=<ruta relativa>`, que obliga a
+  adivinar cómo se llama el vault dentro de la app. Fallaba en el vault por defecto
+  —nadie lo ha dado de alta en Obsidian— y en un `BRAIN_VAULT` que apunte a una
+  subcarpeta de un vault de verdad, que es justo lo que invita a hacer el README.
+  Es decir: toda nota creada por la instalación de una línea devolvía un enlace
+  muerto. Ahora va por ruta absoluta (`path=`) y es Obsidian quien resuelve a qué
+  vault pertenece el fichero.
 - README reordenado: primero la instalación de una línea, que es la que usa
   todo el mundo.
 

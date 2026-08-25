@@ -211,7 +211,7 @@ This is what daily use looks like, without learning a single tool:
 > **You:** yes
 >
 > **Assistant:** linked, reason written into both notes. Here is the link to
-> open it in Obsidian: `obsidian://open?vault=...`
+> open it in Obsidian: `obsidian://open?path=...`
 
 Notice the order: the assistant proposes, you decide, and every connection
 keeps its written reason. That is the whole system.
@@ -315,8 +315,10 @@ Obsidian does: case-insensitive.
 
 Two useful details:
 
-- Every created note returns an `abrir` link (`obsidian://open?...`): one click
-  and you are inside the note in the app.
+- Every created note returns its `ruta` on disk —which always works— and an
+  `abrir` link (`obsidian://open?path=...`): one click and you are inside the
+  note in the app, if you have it. It uses the absolute path, so it does not
+  matter what you named your vault or whether you point at a subfolder of it.
 - `temas` and `relacionadas` live in properties (frontmatter). Obsidian treats
   them as real links, but to see them in graph view enable "Properties" in the
   graph settings.

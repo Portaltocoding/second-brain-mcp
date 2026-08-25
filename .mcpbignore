@@ -1,0 +1,10 @@
+# Lo que no pinta nada dentro del bundle que se instala con doble clic.
+.github/
+.vscode/
+test/
+ejemplo/
+CHANGELOG.md
+*.mcpb
+package-lock.json
+.gitignore
+.mcpbignore

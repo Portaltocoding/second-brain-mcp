@@ -210,7 +210,7 @@ Así se ve el día a día, sin aprenderse ninguna tool:
 > **Tú:** sí
 >
 > **Asistente:** enlazadas, motivo escrito en las dos. Te dejo el enlace para
-> abrirla en Obsidian: `obsidian://open?vault=...`
+> abrirla en Obsidian: `obsidian://open?path=...`
 
 Fíjate en el orden: el asistente propone, tú decides, y cada conexión queda
 con su porqué escrito. Eso es todo el sistema.
@@ -313,8 +313,10 @@ distinguir mayúsculas.
 
 Dos detalles útiles:
 
-- Cada nota creada devuelve un enlace `abrir` (`obsidian://open?...`): un clic
-  y estás en la nota dentro de la app.
+- Cada nota creada devuelve su `ruta` en disco —que sirve siempre— y un enlace
+  `abrir` (`obsidian://open?path=...`): un clic y estás en la nota dentro de la
+  app, si la tienes. Va por ruta absoluta, así que da igual cómo hayas llamado a
+  tu vault o que apuntes a una subcarpeta suya.
 - `temas` y `relacionadas` viven en las propiedades (frontmatter). Obsidian los
   trata como enlaces reales, pero para verlos en el graph view activa
   «Propiedades» en los ajustes del grafo.
