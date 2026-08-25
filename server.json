@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-09-29/server.schema.json",
   "name": "io.github.Portaltocoding/second-brain-mcp",
-  "description": "Second brain en Obsidian: notas, conceptos como nodos, resurfacing y salud del grafo. En castellano.",
+  "description": "Second brain en castellano: tus ideas se conectan y vuelven cuando hacen falta. Obsidian opcional.",
   "repository": {
     "url": "https://github.com/Portaltocoding/second-brain-mcp",
     "source": "github"
