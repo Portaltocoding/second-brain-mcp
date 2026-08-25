@@ -31,8 +31,8 @@
     "vault": {
       "type": "directory",
       "title": "Carpeta de tu cerebro",
-      "description": "La carpeta donde vivirán tus notas (si usas Obsidian, elige tu vault). Puede estar vacía: el sistema crea lo que haga falta.",
-      "required": true
+      "description": "Opcional. La carpeta donde vivirán tus notas (si usas Obsidian, elige tu vault). Puede estar vacía: el sistema crea lo que haga falta. Si la dejas en blanco se usa ~/second-brain, que se crea solo.",
+      "required": false
     }
   },
   "compatibility": {

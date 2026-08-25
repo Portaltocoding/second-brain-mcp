@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, readFile } from 'node:fs/promises';
+import { mkdtemp, readFile, readdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -233,5 +233,33 @@ test('el cliente recibe instructions: el asistente sabe qué es esto sin que le 
     assert.match(instrucciones, /INICIATIVA PROPIA/, 'mandan usar resurgir sin que se lo pidan');
   } finally {
     await client.close();
+  }
+});
+
+test('BRAIN_VAULT vacío o sin expandir no es una ruta: se crea el vault por defecto', async () => {
+  // El manifiesto del .mcpb declara env BRAIN_VAULT: "${user_config.vault}" y esa
+  // carpeta es opcional. Si el usuario no elige ninguna, aquí llega "" o el literal
+  // sin resolver; tomarlo por ruta plantaría una carpeta llamada así en el cwd.
+  for (const valor of ['', '   ', '${user_config.vault}']) {
+    const casa = await mkdtemp(join(tmpdir(), 'second-brain-vacio-'));
+    const cwd = await mkdtemp(join(tmpdir(), 'second-brain-cwd-'));
+    const transport = new StdioClientTransport({
+      command: process.execPath,
+      args: [SERVER],
+      cwd,
+      env: { ...process.env, HOME: casa, USERPROFILE: casa, BRAIN_VAULT: valor },
+    });
+    const client = new Client({ name: 'test', version: '0.0.1' });
+    await client.connect(transport);
+    try {
+      const r = await client.callTool({ name: 'nota_permanente', arguments: { titulo: 'Va al de casa', contenido: 'x' } });
+      assert.equal(r.isError, undefined, `con BRAIN_VAULT=${JSON.stringify(valor)} debería funcionar`);
+      const datos = JSON.parse(r.content[0].text);
+      assert.equal(datos.ruta, join(casa, 'second-brain', '50-Notas', 'Va al de casa.md'));
+      // y NO ha plantado una carpeta con el nombre del placeholder donde estuviera el cwd
+      assert.deepEqual(await readdir(cwd), [], 'el directorio de trabajo queda intacto');
+    } finally {
+      await client.close();
+    }
   }
 });

@@ -47,7 +47,7 @@ rompe— está aquí: https://github.com/Portaltocoding/second-brain-mcp
 }
 
 if (process.argv[2] === '--init') {
-  const destino = process.argv[3] || process.env.BRAIN_VAULT;
+  const destino = rutaConfigurada(process.argv[3]) || rutaConfigurada(process.env.BRAIN_VAULT);
   if (!destino) {
     console.error('uso: second-brain-mcp --init /ruta/al/vault');
     process.exit(1);
@@ -67,7 +67,15 @@ if (process.argv[2] === '--init') {
 //    vault por defecto en ~/second-brain, andamiado al arrancar, y el producto
 //    funciona sin que el usuario configure absolutamente nada.
 //
-// 2. CON LA RUTA MAL ESCRITA NO SE ESCRIBE A CIEGAS. Al revés del anterior, este
+// 2. LO QUE LLEGA VACÍO O SIN EXPANDIR NO CUENTA COMO RUTA. El manifiesto del
+//    bundle de escritorio declara `env: { BRAIN_VAULT: "${user_config.vault}" }`
+//    y esa carpeta es OPCIONAL, así que cuando el usuario no elige ninguna lo que
+//    llega aquí es "" o —según cómo expanda el cliente— el literal
+//    "${user_config.vault}" sin resolver. Tomarlo por una ruta plantaría una
+//    carpeta llamada así allá donde el cliente tenga el directorio de trabajo.
+//    Ambos casos se tratan como «no configurado»: vault por defecto y a correr.
+//
+// 3. CON LA RUTA MAL ESCRITA NO SE ESCRIBE A CIEGAS. Al revés del anterior, este
 //    fallo era silencioso: una ruta con un typo arrancaba igual y plantaba un
 //    vault entero en una carpeta fantasma, mientras el usuario creía estar
 //    escribiendo en su Obsidian. La heurística es la intención: si el directorio
@@ -76,7 +84,16 @@ if (process.argv[2] === '--init') {
 //    que el aviso se vea en el chat y no en un log— pero toda tool responde
 //    explicando qué ruta se pidió y qué hacer.
 const VAULT_POR_DEFECTO = join(homedir(), 'second-brain');
-const rutaPedida = process.env.BRAIN_VAULT || process.argv[2];
+
+// Descarta lo que no es una ruta que el usuario haya elegido: cadena vacía, solo
+// espacios, o una plantilla ${...} que el cliente no supo o no tuvo que expandir.
+function rutaConfigurada(valor) {
+  const limpia = String(valor ?? '').trim();
+  if (!limpia || /\$\{[^}]*\}/.test(limpia)) return null;
+  return limpia;
+}
+
+const rutaPedida = rutaConfigurada(process.env.BRAIN_VAULT) || rutaConfigurada(process.argv[2]);
 const vault = rutaPedida || VAULT_POR_DEFECTO;
 
 let vaultInvalido = null;

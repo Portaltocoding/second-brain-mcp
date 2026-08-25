@@ -55,6 +55,14 @@ presentarse, y dos correcciones de fondo en el motor de búsqueda.
   Es decir: toda nota creada por la instalación de una línea devolvía un enlace
   muerto. Ahora va por ruta absoluta (`path=`) y es Obsidian quien resuelve a qué
   vault pertenece el fichero.
+- **El bundle de doble clic tampoco pide carpeta.** El `.mcpb` la declaraba
+  obligatoria: el mismo fallo que se acaba de quitar del registro, en el único
+  camino de instalación sin terminal. Ahora es opcional y en blanco significa
+  `~/second-brain`. Para que eso sea seguro, el servidor descarta como «no
+  configurado» lo que llega vacío, en blancos, o como una plantilla `${...}` que
+  el cliente no expandió —que es lo que manda un manifiesto cuando el usuario no
+  elige nada—. Antes, tomar ese literal por una ruta habría plantado una carpeta
+  con ese nombre allá donde el cliente tuviera el directorio de trabajo.
 - README reordenado: primero la instalación de una línea, que es la que usa
   todo el mundo.
 
