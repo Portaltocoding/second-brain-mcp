@@ -253,7 +253,7 @@ PROCEDIMIENTO:
 
 4. TEJE: crea con las tools (nota_permanente devuelve sugerencias de conexión). DECISIÓN: propónme las sugerencias fuertes; solo enlazas (nota_enlazar, con motivo de una frase) las que yo confirme.
 
-5. CIERRA en 2-3 líneas: qué entró, con qué conceptos, qué conexiones quedaron hechas o pendientes, y el enlace abrir de lo creado.`,
+5. CIERRA en 2-3 líneas: qué entró, con qué conceptos, qué conexiones quedaron hechas o pendientes, y dónde ha quedado: la ruta del fichero, que siempre sirve, y el enlace de Obsidian solo si sabes que lo uso.`,
       },
     }],
   }),

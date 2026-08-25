@@ -35,13 +35,16 @@ function dirConceptos(vault) {
   return join(vault, CONCEPTOS);
 }
 
-// Enlace obsidian:// para abrir la nota en la app con un clic. El nombre del vault
-// en Obsidian es, por convención, el nombre de su carpeta raíz; si el usuario lo
-// renombró dentro de la app, el enlace sencillamente no resolverá — es un extra,
-// nunca algo de lo que dependa el sistema.
-function uriObsidian(vault, ruta) {
-  const rel = relative(vault, ruta).replace(/\.md$/, '');
-  return `obsidian://open?vault=${encodeURIComponent(basename(vault))}&file=${encodeURIComponent(rel)}`;
+// Enlace obsidian:// para abrir la nota en la app con un clic. Por RUTA ABSOLUTA y
+// no por vault+file: la forma `vault=` obliga a adivinar cómo se llama el vault
+// dentro de Obsidian, y se equivoca en los dos casos que ahora son normales — el
+// vault por defecto (~/second-brain, que nadie ha dado de alta en la app) y un
+// BRAIN_VAULT que apunta a una SUBCARPETA de un vault de verdad, donde ni el
+// nombre ni la ruta relativa valen. Con `path=` es Obsidian quien resuelve a qué
+// vault pertenece el fichero. Sigue siendo un extra: si no hay Obsidian, no abre
+// nada y para eso la respuesta lleva siempre `ruta`.
+function uriObsidian(ruta) {
+  return `obsidian://open?path=${encodeURIComponent(ruta)}`;
 }
 
 // Un concepto/tema es un NODO del grafo. Se canoniza (recorta + inicial en mayúscula)
@@ -112,7 +115,7 @@ temas: ${listaConceptos(temas)}
 `;
   await store.escribirAtomica(ruta, contenido);
   for (const t of temas) await conceptoAsegurar(vault, t);
-  return { creado: true, ruta, abrir: uriObsidian(vault, ruta) };
+  return { creado: true, ruta, abrir: uriObsidian(ruta) };
 }
 
 export async function lecturaNota(vault, { titulo, texto, ubicacion } = {}) {
@@ -198,7 +201,7 @@ ${contenido}
       /* sin sugerencias no pasa nada */
     }
   }
-  return { creado: true, ruta, abrir: uriObsidian(vault, ruta), sugerencias };
+  return { creado: true, ruta, abrir: uriObsidian(ruta), sugerencias };
 }
 
 // Añade "[[X]]" a una lista del frontmatter (p.ej. relacionadas: [...]) por regex,
@@ -255,7 +258,7 @@ export async function conceptoCrear(vault, { nombre, definicion, relacionados = 
     const { nombre: relCanon } = await conceptoAsegurar(vault, rel);
     await store.appendEnSeccion(ruta, 'Relacionados', `- [[${relCanon}]]`);
   }
-  return { ok: true, nombre: canon, ruta, abrir: uriObsidian(vault, ruta) };
+  return { ok: true, nombre: canon, ruta, abrir: uriObsidian(ruta) };
 }
 
 // Grep estructurado sobre todo el vault: fichero, número de línea, la línea y su

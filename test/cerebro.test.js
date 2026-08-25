@@ -359,11 +359,14 @@ test('jardin juzga los wikilinks como Obsidian: sin distinguir mayúsculas', asy
 test('las creaciones devuelven el enlace obsidian:// para abrir la nota', async () => {
   const vault = await vaultVacio();
   const nota = await c.notaPermanente(vault, { titulo: 'Con enlace', contenido: 'idea' });
-  assert.match(nota.abrir, /^obsidian:\/\/open\?vault=.+&file=50-Notas%2FCon%20enlace$/);
+  // por RUTA ABSOLUTA, no por vault+file: adivinar el nombre del vault falla en el
+  // vault por defecto y en un BRAIN_VAULT que apunte a una subcarpeta de otro vault
+  assert.equal(nota.abrir, `obsidian://open?path=${encodeURIComponent(nota.ruta)}`);
+  assert.ok(!nota.abrir.includes('vault='), 'no debe depender del nombre del vault');
   const lectura = await c.lecturaCrear(vault, { titulo: 'Libro X' });
-  assert.match(lectura.abrir, /^obsidian:\/\/open\?vault=/);
+  assert.equal(lectura.abrir, `obsidian://open?path=${encodeURIComponent(lectura.ruta)}`);
   const concepto = await c.conceptoCrear(vault, { nombre: 'Nodo' });
-  assert.match(concepto.abrir, /file=60-Conceptos%2FNodo$/);
+  assert.match(concepto.abrir, /60-Conceptos%2FNodo\.md$/);
 });
 
 test('resurgir encuentra siglas de 2-3 letras (RAG, LLM) en título y en temas', async () => {
