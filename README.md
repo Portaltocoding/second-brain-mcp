@@ -70,6 +70,37 @@ frase que lo dispara:
 
 ## Instalación
 
+### Lo más rápido: una línea, sin configurar nada
+
+Si usas **Claude Code**:
+
+```bash
+claude mcp add --scope user second-brain -- npx -y @toportal/second-brain-mcp
+```
+
+Con cualquier otro cliente MCP:
+
+```json
+{
+  "mcpServers": {
+    "second-brain": {
+      "command": "npx",
+      "args": ["-y", "@toportal/second-brain-mcp"]
+    }
+  }
+}
+```
+
+Sin variables de entorno y sin decidir nada: tu cerebro se monta en
+`~/second-brain`, con las tres carpetas y la portada listas. Dile a tu asistente
+«hazme el onboarding de mi second brain» y ya estás dentro.
+
+¿Prefieres que viva en tu vault de Obsidian de siempre? Añade
+`BRAIN_VAULT=/ruta/a/tu/vault` y punto — el servidor solo escribe en tres
+subcarpetas y no toca nada más. Y si ya empezaste en el vault por defecto,
+mueve la carpeta a donde quieras y apunta `BRAIN_VAULT` allí: son ficheros
+Markdown, no hay nada que migrar.
+
 ### Sin terminal: doble clic y listo
 
 Si usas **Claude Desktop** y no quieres saber nada de comandos ni de JSON,
@@ -81,12 +112,10 @@ cualquiera) y ya está. No necesitas instalar Node ni tocar ningún fichero de
 configuración. Y si además quieres ver tu cerebro dibujado como un grafo,
 instala [Obsidian](https://obsidian.md) y abre esa misma carpeta como vault.
 
-### Con terminal
+### Con terminal, eligiendo tú la carpeta
 
-Necesitas Node 18 o más nuevo y una carpeta para el vault (puede ser tu vault de
-Obsidian de siempre: el servidor solo escribe en tres subcarpetas y no toca nada más).
-
-Con **Claude Code**, a nivel de usuario (disponible en todos tus proyectos):
+Necesitas Node 18 o más nuevo. Con **Claude Code**, a nivel de usuario
+(disponible en todos tus proyectos):
 
 ```bash
 claude mcp add --scope user second-brain \
@@ -108,8 +137,15 @@ Con cualquier otro cliente MCP:
 }
 ```
 
-Y listo. La primera nota crea las carpetas que hagan falta. Si prefieres dejar
-el vault montado desde el principio (carpetas + portada), hay andamiaje:
+Y listo. La primera nota crea las carpetas que hagan falta.
+
+Una salvaguarda: si la ruta que configuras no existe **y su carpeta contenedora
+tampoco**, el servidor da por hecho que es un error al escribirla y te lo dice en
+la conversación en vez de plantarte un vault en una carpeta fantasma. Si el padre
+existe, la crea sin preguntar: eso es lo que querías.
+
+Si prefieres dejar el vault montado desde el principio (carpetas + portada), hay
+andamiaje:
 
 ```bash
 npx -y @toportal/second-brain-mcp --init /ruta/a/tu/vault
@@ -121,7 +157,7 @@ Es idempotente: sobre un vault que ya existe no toca nada.
 
 | Variable | Qué hace | Por defecto |
 |---|---|---|
-| `BRAIN_VAULT` | La ruta de tu vault (obligatoria; también vale como primer argumento) | nada |
+| `BRAIN_VAULT` | La ruta de tu vault (también vale como primer argumento). Si no la pones, se usa el vault por defecto | `~/second-brain` |
 | `BRAIN_MODO` | Motor de `resurgir`: `lexico` o `rag` | `lexico` |
 | `BRAIN_RAG_UMBRAL` | A partir de cuántas notas puede sugerirse el modo rag | `50` |
 

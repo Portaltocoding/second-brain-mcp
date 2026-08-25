@@ -76,6 +76,37 @@ that triggers them:
 
 ## Install
 
+### Fastest: one line, nothing to configure
+
+With **Claude Code**:
+
+```bash
+claude mcp add --scope user second-brain -- npx -y @toportal/second-brain-mcp
+```
+
+With any other MCP client:
+
+```json
+{
+  "mcpServers": {
+    "second-brain": {
+      "command": "npx",
+      "args": ["-y", "@toportal/second-brain-mcp"]
+    }
+  }
+}
+```
+
+No environment variables, no decisions: your brain is set up at `~/second-brain`,
+with the three folders and a cover note ready. Tell your assistant "walk me
+through onboarding my second brain" and you are in.
+
+Want it inside your usual Obsidian vault instead? Add
+`BRAIN_VAULT=/path/to/your/vault` and that is it — the server only writes to
+three subfolders and touches nothing else. And if you already started in the
+default vault, move the folder wherever you like and point `BRAIN_VAULT` there:
+these are Markdown files, there is nothing to migrate.
+
 ### No terminal: double click and done
 
 If you use **Claude Desktop** and want nothing to do with commands or JSON,
@@ -127,7 +158,7 @@ It is idempotent: on an existing vault it changes nothing.
 
 | Variable | What it does | Default |
 |---|---|---|
-| `BRAIN_VAULT` | Path to your vault (required; also works as first CLI argument) | none |
+| `BRAIN_VAULT` | Path to your vault (also works as first CLI argument). Omit it to use the default vault | `~/second-brain` |
 | `BRAIN_MODO` | `resurgir` engine: `lexico` or `rag` | `lexico` |
 | `BRAIN_RAG_UMBRAL` | Note count from which rag mode may be suggested | `50` |
 
