@@ -7,7 +7,8 @@ import * as cerebro from './cerebro.js';
 
 export const registro = {
   lectura_crear: {
-    description: 'Crea una nota en 40-Lecturas/. Falla si ya existe una lectura con ese título.',
+    description:
+      'Abre una lectura en 40-Lecturas/: el libro, artículo, vídeo o curso que el usuario está empezando. Llámala en cuanto mencione que está leyendo algo que aún no existe en el brain, sin pedirle permiso para el trámite. Falla si ya existe una lectura con ese título.',
     schema: {
       titulo: z.string(),
       autor: z.string().optional(),
@@ -17,7 +18,8 @@ export const registro = {
     ejecutar: (vault, { titulo, autor, formato, temas } = {}) => cerebro.lecturaCrear(vault, { titulo, autor, formato, temas }),
   },
   lectura_nota: {
-    description: 'Appendea una línea a ## Notas mientras leo de la lectura dada.',
+    description:
+      'Guarda un apunte suelto en la lectura dada (## Notas mientras leo): la frase que le llamó la atención, tal cual la diga. Es el gesto más frecuente del día a día y no destila nada — destilar es cosa de nota_permanente, después.',
     schema: {
       titulo: z.string(),
       texto: z.string(),
@@ -59,7 +61,8 @@ export const registro = {
     ejecutar: (vault, { titulo, con, bidireccional, motivo } = {}) => cerebro.notaEnlazar(vault, { titulo, con, bidireccional, motivo }),
   },
   concepto_crear: {
-    description: 'Crea o define un concepto (nodo de 60-Conceptos/), opcionalmente con definición y conceptos relacionados.',
+    description:
+      'Crea o define un concepto (nodo de 60-Conceptos/). Úsalo para plantar la bandera de un tema que el usuario quiere dominar: todo lo que ingiera después con ese tema se cuelga solo del nodo. Los temas de nota_permanente ya crean sus conceptos, así que no lo llames por rutina.',
     schema: {
       nombre: z.string(),
       definicion: z.string().optional(),

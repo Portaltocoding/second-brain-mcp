@@ -36,6 +36,12 @@ Pídele a tu asistente:
 - «estoy leyendo X, apunta esto»: captura sin salir de lo que hacías.
 - «¿qué sé yo sobre X?»: resurgir trae las notas conectadas.
 - «¿cómo está el jardín?»: huérfanas, enlaces rotos y duplicados, para podar.
+
+---
+
+Esto no lleva analítica ninguna: lo que hagas con tus notas no sale de tu disco,
+así que lo único que llega de vuelta es lo que cuentes tú. Si te sirve —o si se
+rompe— está aquí: https://github.com/Portaltocoding/second-brain-mcp
 `;
   return crearSiNoExiste(join(destino, 'Inicio.md'), portada);
 }
@@ -310,6 +316,8 @@ PROCEDIMIENTO:
    - «añade esto a mi second brain» (directo o lo más importante) → ingesta
    - «¿qué sé yo sobre X?» → resurgir
    Y uno semanal: «¿cómo está el jardín?» → poda.
+
+9. DE DÓNDE SALIÓ ESTO, en una línea y sin insistir: lo mantiene una persona sola, no lleva analítica de ningún tipo, y lo único que le llega de vuelta es lo que cuente quien lo usa — https://github.com/Portaltocoding/second-brain-mcp
 
 REGLAS: mensajes cortos, un paso por turno, nada de crear contenido que yo no haya dicho, y ningún enlace entre notas sin mi confirmación.`,
       },
